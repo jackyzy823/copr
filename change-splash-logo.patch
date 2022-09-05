@@ -1,0 +1,38 @@
+diff --git a/lnf/breath-dark/contents/splash/Splash.qml b/lnf/breath-dark/contents/splash/Splash.qml
+index ebc9cab..37150ee 100644
+--- a/lnf/breath-dark/contents/splash/Splash.qml
++++ b/lnf/breath-dark/contents/splash/Splash.qml
+@@ -45,11 +45,11 @@ Item {
+                 //match SDDM/lockscreen avatar positioning
+                 property real size: units.gridUnit * 8
+                 
+-                source: "images/manjarologo.svgz"
++                source: "images/fedora_logo_darkbackground.svg"
+                 width: maxWidth
+                 
+-                sourceSize.width: 254
+-                sourceSize.height: 50
++                sourceSize.width: 228
++                sourceSize.height: 103
+                 layer.enabled: true
+                 layer.effect: DropShadow {
+                     transparentBorder: true
+diff --git a/lnf/breath/contents/splash/Splash.qml b/lnf/breath/contents/splash/Splash.qml
+index 222c82a..4d0f1f4 100644
+--- a/lnf/breath/contents/splash/Splash.qml
++++ b/lnf/breath/contents/splash/Splash.qml
+@@ -45,11 +45,11 @@ Item {
+                 //match SDDM/lockscreen avatar positioning
+                 property real size: units.gridUnit * 8
+                 
+-                source: "images/manjarologo.svgz"
++                source: "images/fedora_logo_darkbackground.svg"
+                 width: maxWidth
+                 
+-                sourceSize.width: 254
+-                sourceSize.height: 50
++                sourceSize.width: 228
++                sourceSize.height: 103
+                 layer.enabled: true
+                 layer.effect: DropShadow {
+                     transparentBorder: true
