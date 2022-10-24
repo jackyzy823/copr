@@ -1,13 +1,13 @@
 Name:    plasma-breath
 Version: 21.3.0
-Release: %autorelease
+Release: 4%{?dist}
 Summary: Artwork, styles and assets for the Breath visual style for the Plasma Desktop
 License: LGPL AND CC-BY-SA-4.0
 
 %undefine __cmake_in_source_build
 
 %global         base_name   breath
-%global         commit      3130eb1addeebb4b93f1192c377383618ebecaa3
+%global         commit      46e32f264f8bef8afcc73b833f788b633706ccde
 
 URL:     https://gitlab.manjaro.org/artwork/themes/%{base_name}
 
