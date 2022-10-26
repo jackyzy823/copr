@@ -1,0 +1,8 @@
+diff --git a/wallpapers/CMakeLists.txt b/wallpapers/CMakeLists.txt
+index df126b5b..617477ba 100644
+--- a/wallpapers/CMakeLists.txt
++++ b/wallpapers/CMakeLists.txt
+@@ -1,2 +1,3 @@
+ install(DIRECTORY Bamboo DESTINATION ${WALLPAPER_INSTALL_DIR})
+ install(DIRECTORY "Bamboo at Night" DESTINATION ${WALLPAPER_INSTALL_DIR})
++install(DIRECTORY North DESTINATION ${WALLPAPER_INSTALL_DIR})

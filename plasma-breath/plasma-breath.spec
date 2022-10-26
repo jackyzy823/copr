@@ -15,6 +15,7 @@ Source0: https://gitlab.manjaro.org/artwork/themes/%{base_name}/-/archive/%{comm
 Source1: https://pagure.io/fedora-logos/raw/03c2476f35008c66fa269b8c04828c8ffe168df3/f/fedora/fedora_logo_darkbackground.svg
 
 Patch: change-splash-logo.patch
+Patch: install-wallpaper-north.patch
 
 BuildRequires:  extra-cmake-modules
 BuildRequires:  plasma-workspace
