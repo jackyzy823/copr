@@ -1,0 +1,43 @@
+diff --git a/Makefile b/Makefile
+index 5159a7b..acbf3b1 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,7 +1,7 @@
+ .PHONY: all install uninstall
+ name = amd-disable-c6
+ CXX ?= g++
+-CXXFLAGS = -std=c++11 -O3 -Wall
++CXXFLAGS = -std=c++11 -O3 -Wall -static
+ cppfiles = $(name).cpp
+ all: $(name)
+ 
+@@ -13,6 +13,7 @@ install: $(name)
+ 	mkdir -p $(DESTDIR)/usr/lib/systemd/system
+ 	install -m 540 $(name) $(DESTDIR)/usr/sbin
+ 	install -m 644 $(name).service $(DESTDIR)/usr/lib/systemd/system
++	install -m 644 amd-enable-c6.service $(DESTDIR)/usr/lib/systemd/system
+ 
+ uninstall:
+ 	rm -f $(DESTDIR)/usr/sbin/$(name)
+diff --git a/amd-disable-c6.service b/amd-disable-c6.service
+index 8ad5200..97722b5 100644
+--- a/amd-disable-c6.service
++++ b/amd-disable-c6.service
+@@ -1,13 +1,12 @@
+ [Unit]
+-Description=Service to disable the C6 State on AMD Zen-based (Ryzen, Epyc) processors on boot
++Description=Service to disable the C6 State on AMD Zen-based (Ryzen, Epyc) processors after boot/sleep
+ DefaultDependencies=no
+-After=sysinit.target local-fs.target systemd-modules-load.service
+-Before=multi-user.target
++After=sysinit.target local-fs.target sleep.target
++Before=basic.target
+ 
+ [Service]
+ Type=oneshot
+ ExecStart=/usr/sbin/amd-disable-c6 --disable_c6_retry
+ 
+ [Install]
+-Alias=amd-disable-c6
+-WantedBy=multi-user.target
++WantedBy=basic.target sleep.target
