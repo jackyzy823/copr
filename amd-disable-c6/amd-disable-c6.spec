@@ -1,6 +1,6 @@
 Name:    amd-disable-c6
 Version: 0
-Release: 1%{?dist}
+Release: 3%{?dist}
 Summary: Systemd service to automatically disable/enable the C6 power saving state on AMD Zen (Ryzen / Epyc) processors.
 License: MIT
 
@@ -19,6 +19,7 @@ Source0: https://github.com/%{author}/%{base_name}/archive/%{commit}/%{base_name
 Source1: %{enable_c6_serivce}.service
 
 Patch: custom.patch
+Patch: fix-mixed-value-with-return-code.patch
 
 BuildRequires: gcc-c++
 BuildRequires: systemd-rpm-macros

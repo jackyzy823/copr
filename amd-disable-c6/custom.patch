@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index 5159a7b..acbf3b1 100644
+index 5159a7b..ed0560b 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -1,7 +1,7 @@
@@ -11,9 +11,12 @@ index 5159a7b..acbf3b1 100644
  cppfiles = $(name).cpp
  all: $(name)
  
-@@ -13,6 +13,7 @@ install: $(name)
+@@ -11,8 +11,9 @@ $(name):$(cppfiles)
+ install: $(name)
+ 	mkdir -p $(DESTDIR)/usr/sbin
  	mkdir -p $(DESTDIR)/usr/lib/systemd/system
- 	install -m 540 $(name) $(DESTDIR)/usr/sbin
+-	install -m 540 $(name) $(DESTDIR)/usr/sbin
++	install -m 755 $(name) $(DESTDIR)/usr/sbin
  	install -m 644 $(name).service $(DESTDIR)/usr/lib/systemd/system
 +	install -m 644 amd-enable-c6.service $(DESTDIR)/usr/lib/systemd/system
  

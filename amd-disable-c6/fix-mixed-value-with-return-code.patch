@@ -1,0 +1,36 @@
+diff --git a/amd-disable-c6.cpp b/amd-disable-c6.cpp
+index e0da450..652d9f7 100755
+--- a/amd-disable-c6.cpp
++++ b/amd-disable-c6.cpp
+@@ -114,13 +114,13 @@ uint64_t read_msr(long int msr_addr, unsigned int cpu_id = 0) {
+     FILE * f = fopen(path.c_str(), "r");
+     if (!f) {
+         std::cerr << "Failed reading of C6 state; msr module is not loaded in kernel" << std::endl;
+-        return 0;
++        throw std::system_error();
+     }
+     int err = fseek (f, msr_addr, SEEK_SET);
+     if (err) {
+         std::cerr << "Failed reading of C6 state; error reading msr" << std::endl;
+         fclose(f);
+-        return 0;
++        throw std::system_error();
+     }
+     uint64_t msr_value = 0;
+     fread(&msr_value, 8, 1, f);
+@@ -187,9 +187,12 @@ int direct_execution_main(const op_mode &mode) {
+         case NONE:
+             return 0;
+         default:
+-            uint64_t core_msr_value = read_msr(CORE_MSR_ADDR);
+-            uint64_t package_msr_value = read_msr(PACKAGE_MSR_ADDR);
+-            if (!core_msr_value || !package_msr_value) {
++            uint64_t core_msr_value = 0;
++            uint64_t package_msr_value = 0;
++            try {
++                core_msr_value = read_msr(CORE_MSR_ADDR);
++                package_msr_value = read_msr(PACKAGE_MSR_ADDR);
++            } catch (const std::system_error&) {
+                 std::cerr << "Error reading msr; got invalid value" << std::endl;
+                 return 1;
+             }
