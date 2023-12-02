@@ -1,13 +1,13 @@
 Name:    plasma-breath
-Version: 21.3.0
-Release: 4%{?dist}
+Version: 22.0.0
+Release: 1%{?dist}
 Summary: Artwork, styles and assets for the Breath visual style for the Plasma Desktop
 License: LGPL AND CC-BY-SA-4.0
 
 %undefine __cmake_in_source_build
 
 %global         base_name   breath
-%global         commit      46e32f264f8bef8afcc73b833f788b633706ccde
+%global         commit      98822e7d903f16116bfb02ff9921824c139d7bbc
 
 URL:     https://gitlab.manjaro.org/artwork/themes/%{base_name}
 
@@ -15,7 +15,6 @@ Source0: https://gitlab.manjaro.org/artwork/themes/%{base_name}/-/archive/%{comm
 Source1: https://pagure.io/fedora-logos/raw/03c2476f35008c66fa269b8c04828c8ffe168df3/f/fedora/fedora_logo_darkbackground.svg
 
 Patch: change-splash-logo.patch
-Patch: install-wallpaper-north.patch
 
 BuildRequires:  extra-cmake-modules
 BuildRequires:  plasma-workspace
