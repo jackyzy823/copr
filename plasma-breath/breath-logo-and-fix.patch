@@ -1,0 +1,212 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 718a42c9..fa30520d 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -61,6 +61,7 @@ if(BUILD_SDDM_THEME)
+     DIRECTORY sddm-theme/
+     DESTINATION ${KDE_INSTALL_FULL_DATADIR}/sddm/themes/breath
+     PATTERN "README.txt" EXCLUDE
++    PATTERN "components" EXCLUDE
+     PATTERN "dummydata" EXCLUDE
+     PATTERN "theme.conf.cmake" EXCLUDE)
+ 
+diff --git a/lnf/breath-dark/contents/splash/Splash.qml b/lnf/breath-dark/contents/splash/Splash.qml
+index 45b4b533..63c3a498 100644
+--- a/lnf/breath-dark/contents/splash/Splash.qml
++++ b/lnf/breath-dark/contents/splash/Splash.qml
+@@ -32,7 +32,7 @@ Image {
+ 
+             anchors.centerIn: parent
+             asynchronous: true
+-            source: "images/manjarologo.svgz"
++            source: "images/fedora_logo_darkbackground.svg"
+             sourceSize.height: size
+         }
+ 
+diff --git a/lnf/breath/contents/splash/Splash.qml b/lnf/breath/contents/splash/Splash.qml
+index 45b4b533..63c3a498 100644
+--- a/lnf/breath/contents/splash/Splash.qml
++++ b/lnf/breath/contents/splash/Splash.qml
+@@ -32,7 +32,7 @@ Image {
+ 
+             anchors.centerIn: parent
+             asynchronous: true
+-            source: "images/manjarologo.svgz"
++            source: "images/fedora_logo_darkbackground.svg"
+             sourceSize.height: size
+         }
+ 
+diff --git a/sddm-theme/Login.qml b/sddm-theme/Login.qml
+index 4a09aea4..cc897a81 100644
+--- a/sddm-theme/Login.qml
++++ b/sddm-theme/Login.qml
+@@ -21,8 +21,6 @@ SessionManagementScreen {
+     property int visibleBoundary: mapFromItem(loginButton, 0, 0).y
+     onHeightChanged: visibleBoundary = mapFromItem(loginButton, 0, 0).y + loginButton.height + Kirigami.Units.smallSpacing
+ 
+-    property int fontSize: parseInt(config.fontSize)
+-
+     signal loginRequest(string username, string password)
+ 
+     onShowUsernamePromptChanged: {
+@@ -76,7 +74,6 @@ SessionManagementScreen {
+ 
+     PlasmaComponents3.TextField {
+         id: userNameInput
+-        font.pointSize: fontSize + 1
+         Layout.fillWidth: true
+ 
+         text: lastUserName
+@@ -96,7 +93,6 @@ SessionManagementScreen {
+ 
+         PlasmaExtras.PasswordField {
+             id: passwordBox
+-            font.pointSize: fontSize + 1
+             Layout.fillWidth: true
+ 
+             placeholderText: i18nd("plasma_lookandfeel_org.kde.lookandfeel", "Password")
+diff --git a/sddm-theme/Main.qml b/sddm-theme/Main.qml
+index 40853b7f..a433a482 100644
+--- a/sddm-theme/Main.qml
++++ b/sddm-theme/Main.qml
+@@ -15,11 +15,6 @@ import org.kde.kirigami 2.20 as Kirigami
+ 
+ import org.kde.breeze.components
+ 
+-// TODO: Once SDDM 0.19 is released and we are setting the font size using the
+-// SDDM KCM's syncing feature, remove the `config.fontSize` overrides here and
+-// the fontSize properties in various components, because the theme's default
+-// font size will be correctly propagated to the login screen
+-
+ Item {
+     id: root
+ 
+@@ -209,30 +204,26 @@ Item {
+                 actionItemsVisible: !inputPanel.keyboardActive
+                 actionItems: [
+                     ActionButton {
+-                        iconSource: "system-suspend"
++                        icon.name: "system-suspend"
+                         text: i18ndc("plasma_lookandfeel_org.kde.lookandfeel", "Suspend to RAM", "Sleep")
+-                        fontSize: parseInt(config.fontSize) + 1
+                         onClicked: sddm.suspend()
+                         enabled: sddm.canSuspend
+                     },
+                     ActionButton {
+-                        iconSource: "system-reboot"
++                        icon.name: "system-reboot"
+                         text: i18nd("plasma_lookandfeel_org.kde.lookandfeel", "Restart")
+-                        fontSize: parseInt(config.fontSize) + 1
+                         onClicked: sddm.reboot()
+                         enabled: sddm.canReboot
+                     },
+                     ActionButton {
+-                        iconSource: "system-shutdown"
++                        icon.name: "system-shutdown"
+                         text: i18nd("plasma_lookandfeel_org.kde.lookandfeel", "Shut Down")
+-                        fontSize: parseInt(config.fontSize) + 1
+                         onClicked: sddm.powerOff()
+                         enabled: sddm.canPowerOff
+                     },
+                     ActionButton {
+-                        iconSource: "system-user-prompt"
++                        icon.name: "system-user-prompt"
+                         text: i18ndc("plasma_lookandfeel_org.kde.lookandfeel", "For switching to a username and password prompt", "Other…")
+-                        fontSize: parseInt(config.fontSize) + 1
+                         onClicked: mainStack.push(userPromptComponent)
+                         enabled: true
+                         visible: !userListComponent.showUsernamePrompt
+@@ -330,7 +321,6 @@ Item {
+                 showUsernamePrompt: true
+                 notificationMessage: root.notificationMessage
+                 loginScreenUiVisible: loginScreenRoot.uiVisible
+-                fontSize: parseInt(config.fontSize) + 2
+ 
+                 // using a model rather than a QObject list to avoid QTBUG-75900
+                 userListModel: ListModel {
+@@ -353,30 +343,26 @@ Item {
+                 actionItemsVisible: !inputPanel.keyboardActive
+                 actionItems: [
+                     ActionButton {
+-                        iconSource: "system-suspend"
++                        icon.name: "system-suspend"
+                         text: i18ndc("plasma_lookandfeel_org.kde.lookandfeel", "Suspend to RAM", "Sleep")
+-                        fontSize: parseInt(config.fontSize) + 1
+                         onClicked: sddm.suspend()
+                         enabled: sddm.canSuspend
+                     },
+                     ActionButton {
+-                        iconSource: "system-reboot"
++                        icon.name: "system-reboot"
+                         text: i18nd("plasma_lookandfeel_org.kde.lookandfeel", "Restart")
+-                        fontSize: parseInt(config.fontSize) + 1
+                         onClicked: sddm.reboot()
+                         enabled: sddm.canReboot
+                     },
+                     ActionButton {
+-                        iconSource: "system-shutdown"
++                        icon.name: "system-shutdown"
+                         text: i18nd("plasma_lookandfeel_org.kde.lookandfeel", "Shut Down")
+-                        fontSize: parseInt(config.fontSize) + 1
+                         onClicked: sddm.powerOff()
+                         enabled: sddm.canPowerOff
+                     },
+                     ActionButton {
+-                        iconSource: "system-user-list"
++                        icon.name: "system-user-list"
+                         text: i18nd("plasma_lookandfeel_org.kde.lookandfeel", "List Users")
+-                        fontSize: parseInt(config.fontSize) + 1
+                         onClicked: mainStack.pop()
+                     }
+                 ]
+@@ -451,7 +437,6 @@ Item {
+                 id: virtualKeyboardButton
+ 
+                 text: i18ndc("plasma_lookandfeel_org.kde.lookandfeel", "Button to show/hide virtual keyboard", "Virtual Keyboard")
+-                font.pointSize: config.fontSize
+                 icon.name: inputPanel.keyboardActive ? "input-keyboard-virtual-on" : "input-keyboard-virtual-off"
+                 onClicked: {
+                     // Otherwise the password field loses focus and virtual keyboard
+@@ -473,8 +458,6 @@ Item {
+             KeyboardButton {
+                 id: keyboardButton
+ 
+-                font.pointSize: config.fontSize
+-
+                 onKeyboardLayoutChanged: {
+                     // Otherwise the password field loses focus and virtual keyboard
+                     // keystrokes get eaten
+@@ -493,8 +476,6 @@ Item {
+             SessionButton {
+                 id: sessionButton
+ 
+-                font.pointSize: config.fontSize
+-
+                 onSessionChanged: {
+                     // Otherwise the password field loses focus and virtual keyboard
+                     // keystrokes get eaten
+@@ -514,10 +495,6 @@ Item {
+             Item {
+                 Layout.fillWidth: true
+             }
+-
+-            Battery {
+-                fontSize: config.fontSize
+-            }
+         }
+     }
+ 
+diff --git a/sddm-theme/theme.conf.cmake b/sddm-theme/theme.conf.cmake
+index 976033ca..204bd811 100644
+--- a/sddm-theme/theme.conf.cmake
++++ b/sddm-theme/theme.conf.cmake
+@@ -1,8 +1,7 @@
+ [General]
+ showlogo=hidden
+-logo=${KDE_INSTALL_FULL_DATAROOTDIR}/sddm/themes/breath/manjarologo.svgz
++logo=${KDE_INSTALL_FULL_DATAROOTDIR}/sddm/themes/breath/fedora_logo_darkbackground.svg
+ type=image
+ color=#1abc9c
+ background=${KDE_INSTALL_FULL_WALLPAPERDIR}/Foreland/contents/images/5120x2880.png
+-fontSize=10
+ needsFullUserModel=false
