@@ -1,6 +1,6 @@
 Name:    plasma-breath
 Version: 24.0.0
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: Artwork, styles and assets for the Breath visual style for the Plasma Desktop
 License: LGPL AND CC-BY-SA-4.0
 
@@ -14,7 +14,10 @@ URL:     https://gitlab.manjaro.org/artwork/themes/%{base_name}
 Source0: https://gitlab.manjaro.org/artwork/themes/%{base_name}/-/archive/%{commit}/%{base_name}-%{commit}.tar.bz2
 Source1: https://pagure.io/fedora-logos/raw/03c2476f35008c66fa269b8c04828c8ffe168df3/f/fedora/fedora_logo_darkbackground.svg
 
-Patch: breath-logo-and-fix.patch
+# Sync with upstream plasma-desktop's sddm-theme (already done by manjaro team)
+Patch0: https://gitlab.manjaro.org/artwork/themes/breath/-/commit/0266802cdbe62a9f18c9fdb9630732d60e49fa90.patch
+# Update icon and prevent upgrade conflicts caused by /usr/share/sddm/themes/breath/components is now a file instead of folder
+Patch1: breath-logo-and-fix.patch
 
 BuildRequires:  extra-cmake-modules
 BuildRequires:  kf6-plasma-devel
