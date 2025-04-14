@@ -1,0 +1,39 @@
+## use 0.106.0 -> to use bindgen 0.69 (<=129.0) since no deno_core support exactly 129.0
+[package]
+# icudtl.dat icudtb.dat too big to be exclude from the tarball to upload to crates.io
+# TODO set commit_hash as global var ? but how?
+extra-sources = [ {number = 2 , file="https://raw.githubusercontent.com/denoland/icu/a22a8f24224ddda8b856437d7e8560de1da3f8e1/common/icudtl.dat", comments=[""]} , { number=3,file="https://raw.githubusercontent.com/denoland/icu/a22a8f24224ddda8b856437d7e8560de1da3f8e1/common/icudtb.dat", comments=[""]}]
+cargo-toml-patch-comments = ["since we re-package it from crates.io, we won't exclude any files. (and include dot files)"]
+
+## or do with script.prep?
+## Patch0 -> remove Cargo.toml' exclude (keep ! ones)
+# Patch0: remove exclude (keep !ones to keep .gn file) to fully package all the necessary files like v8/tools/BUILD.gn , icudtl/icudtb we copied in.
+extra-patches = [
+  { number = 2, file = "0001-fix-clang.patch", comments = ["for use clang 19 + triple redhat instead of unknown"] },
+  #{ number = 3, file = "0002-env-from-cargo-config-toml.patch", comments = ["for building from source"] }
+  { number = 3, file = "0002-set-env-in-build-rs.patch", comments = ["for building from source"] }
+]
+
+## TODO?
+supported-arches = ["x86_64"]
+## TODO add a BuildArch:x86_64 under root, and remove all BuildArch:noarch in package section
+
+[requires]
+## python3-devel to fix shebang
+# https://fedoraproject.org/wiki/Changes/Python3.12#pathfix.py_tool_will_be_removed
+build = ["clang >= 19, clang < 20" , "gn" , "ninja-build", "pkgconfig(glib-2.0)" , "lld" , "python3-devel"]
+
+[scripts]
+prep.pre =  [
+"mkdir -p third_party/icu/common/",
+"cp -p %{SOURCE2} third_party/icu/common/",
+"cp -p %{SOURCE3} third_party/icu/common/",
+"%py3_shebang_fix ."
+]
+
+[tests]
+skip = ["ui"]
+skip-exact = true
+## handle_scope_escape_to_nowhere --> old ver error:  xxx as xxx , new ver error: xxx implements xxx
+## handle_scope_escape_to_nowhere.stderr is updated in new version, so we could treat this as not failure
+comments = [ "handle_scope_escape_to_nowhere returns different format of error message" ]

@@ -1,0 +1,42 @@
+- BuildArch problem
+
+- Provide: bundle(v8)
+
+
+use rust2rpm.toml to inject `export XXX` and others 
+
+man 5 rust2rpm.toml
+see https://www.mankier.com/5/rust2rpm.toml#Options-[scripts]_table
+
+
+1) about V8_FROM_SOURCE
+since export V8_FROM_SOURCE is not used in building serde-v8 (its dependent) 
+so we need to patch build.rs 
+
+or??
+set .cargo/config.toml => [env] .....
+NOT work since cargo rpm macro will overwrite .cargo/config.toml
+
+or patch with remove V8_FROM_SOURCE --> force all built from source
+
+or patcg with unsafe { std::env::set_var("V8_FROM_SOURCE",1)}
+
+
+2) about v8/tools/BUILD.gn is not included? 
+maybe related to cargo.toml -> exclude
+rust2rpm maybe calcuate not correct ??
+
+or if we set exclude=[] , .gn will be missing
+
+or rust2rpm.toml 
+
+
+# For "library" crates, this macro causes the crate to be re-packaged with
+	
+# "cargo package" (with some workarounds to to make this work even if not all
+	
+# dependencies are present for dependency resolution):
+
+
+
+

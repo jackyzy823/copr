@@ -1,0 +1,11 @@
+[tests]
+run = ["none"]
+comments = ["construct dependency fast"]
+
+[scripts]
+## Remove executable bits of rebuild_async_stubs.js to avoid deno be listed as requires when mangling shebang with brp-mangle-shebangs
+## Ref: https://groups.google.com/g/linux.redhat.rpm/c/xSzGSWh8Kg8
+prep.pre =  [
+"chmod -x rebuild_async_stubs.js"
+]
+

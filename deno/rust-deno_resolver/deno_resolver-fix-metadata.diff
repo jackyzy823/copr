@@ -1,0 +1,11 @@
+--- deno_resolver-0.9.0/Cargo.toml	1970-01-01T00:00:01+00:00
++++ deno_resolver-0.9.0/Cargo.toml	2025-04-15T00:52:02.530159+00:00
+@@ -56,7 +56,7 @@
+ version = "1.0.61"
+ 
+ [dependencies.url]
+-version = "< 2.5.0"
++version = "2.5.0"
+ features = [
+     "serde",
+     "expose_internals",

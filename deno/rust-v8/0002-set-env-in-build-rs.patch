@@ -1,0 +1,15 @@
+diff --git a/build.rs b/build.rs
+index 4aead47..c92c2c6 100644
+--- a/build.rs
++++ b/build.rs
+@@ -20,6 +20,10 @@ use std::process::Stdio;
+ use which::which;
+ 
+ fn main() {
++  unsafe {
++    env::set_var("V8_FROM_SOURCE", "1");
++    env::set_var("CLANG_BASE_PATH", "/usr");
++  }
+   println!("cargo:rerun-if-changed=.gn");
+   println!("cargo:rerun-if-changed=BUILD.gn");
+   println!("cargo:rerun-if-changed=src/binding.cc");

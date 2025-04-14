@@ -1,0 +1,3 @@
+*.crate
+*.rpm
+*\.build*.log

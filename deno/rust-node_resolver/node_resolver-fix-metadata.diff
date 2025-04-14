@@ -1,0 +1,20 @@
+--- node_resolver-0.16.0/Cargo.toml	1970-01-01T00:00:01+00:00
++++ node_resolver-0.16.0/Cargo.toml	2025-04-14T16:03:45.139042+00:00
+@@ -55,7 +55,7 @@
+ version = "1.17.1"
+ 
+ [dependencies.path-clean]
+-version = "=0.1.0"
++version = "1.0.1"
+ 
+ [dependencies.regex]
+ version = "^1.7.0"
+@@ -71,7 +71,7 @@
+ features = ["full"]
+ 
+ [dependencies.url]
+-version = "< 2.5.0"
++version = "2.5.0"
+ features = [
+     "serde",
+     "expose_internals",
