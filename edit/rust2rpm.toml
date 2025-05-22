@@ -1,0 +1,3 @@
+[tests]
+run = ["none"]
+comments = ["skip criterion"]

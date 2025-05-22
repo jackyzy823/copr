@@ -1,0 +1,26 @@
+--- edit-1.0.0/Cargo.toml	2025-05-22T07:40:17.720215+00:00
++++ edit-1.0.0/Cargo.toml	2025-05-22T07:50:56.325134+00:00
+@@ -37,22 +37,6 @@
+ [target.'cfg(unix)'.dependencies]
+ libc = "0.2"
+ 
+-[target.'cfg(windows)'.build-dependencies]
+-winres = "0.1"
+-
+-[target.'cfg(windows)'.dependencies.windows-sys]
+-version = "0.59"
+-features = [
+-    "Win32_Globalization",
+-    "Win32_Security",
+-    "Win32_Storage_FileSystem",
+-    "Win32_System_Console",
+-    "Win32_System_Diagnostics_Debug",
+-    "Win32_System_IO",
+-    "Win32_System_LibraryLoader",
+-    "Win32_System_Memory",
+-    "Win32_System_Threading",
+-]
+-
+ [dev-dependencies]
+ criterion = { version = "0.5", features = ["html_reports"] }
++
