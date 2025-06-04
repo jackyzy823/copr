@@ -6,7 +6,7 @@
 %global cargo_install_lib 0
 
 Name:           edit
-Version:        1.0.0
+Version:        1.1.0
 Release:        %autorelease
 Summary:        A simple editor for simple needs (Microsoft Edit).
 
@@ -18,7 +18,6 @@ URL:            https://github.com/microsoft/edit
 Source:         https://github.com/microsoft/edit/archive/v%{version}/edit-v%{version}.tar.gz
 # Automatically generated patch to strip dependencies and normalize metadata
 Patch0:          edit-fix-metadata-auto.diff
-Patch1:          remove-nightly.patch
 
 BuildRequires:  cargo-rpm-macros >= 26
 
