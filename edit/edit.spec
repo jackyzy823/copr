@@ -6,7 +6,7 @@
 %global cargo_install_lib 0
 
 Name:           edit
-Version:        1.1.0
+Version:        1.2.0
 Release:        %autorelease
 Summary:        A simple editor for simple needs (Microsoft Edit).
 
