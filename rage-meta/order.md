@@ -1,0 +1,13 @@
+rust-wsl
+rust-io_tee
+rust-bech32
+rust-chacha20poly1305
+rust-secrecy
+rust-pinentry
+rust-i18n-embed
+rust-fuser
+rust-i18n-embed-fl
+rust-fuse_mt
+rust-age-core
+rust-age
+rust-rage
