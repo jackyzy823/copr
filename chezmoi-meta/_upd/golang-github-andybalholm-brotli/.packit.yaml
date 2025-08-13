@@ -1,0 +1,19 @@
+specfile_path: golang-github-andybalholm-brotli.spec
+
+upstream_package_name: brotli
+upstream_project_url: https://github.com/andybalholm/brotli
+downstream_package_name: golang-github-andybalholm-brotli
+
+upstream_tag_template: v{version}
+
+jobs:
+
+- job: pull_from_upstream
+  trigger: release
+  dist_git_branches:
+   - fedora-rawhide
+
+- job: koji_build
+  trigger: commit
+  dist_git_branches:
+    - fedora-rawhide

@@ -1,0 +1,5 @@
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.2.0-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Tue Jun 08 14:02:41 PDT 2021 Davide Cavalca <dcavalca@fedoraproject.org> - 1.2.0-1
+- Initial package

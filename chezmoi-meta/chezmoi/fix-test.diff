@@ -1,0 +1,13 @@
+diff --git a/internal/chezmoibubbles/intinputmodel_test.go b/internal/chezmoibubbles/intinputmodel_test.go
+index 014bf30fe..d6d847f4d 100644
+--- a/internal/chezmoibubbles/intinputmodel_test.go
++++ b/internal/chezmoibubbles/intinputmodel_test.go
+@@ -48,7 +48,7 @@ func TestIntInputModel(t *testing.T) {
+ 		{
+ 			name:          "one_invalid_enter",
+ 			input:         "1a\r",
+-			expectedValue: 0,
++			expectedValue: 1,
+ 		},
+ 	} {
+ 		t.Run(tc.name, func(t *testing.T) {
