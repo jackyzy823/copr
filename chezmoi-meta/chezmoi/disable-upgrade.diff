@@ -1,0 +1,68 @@
+diff --git a/internal/cmd/config.go b/internal/cmd/config.go
+index 1714b9823..11b166ecc 100644
+--- a/internal/cmd/config.go
++++ b/internal/cmd/config.go
+@@ -209,7 +209,6 @@ type Config struct {
+ 	secret          secretCmdConfig
+ 	state           stateCmdConfig
+ 	unmanaged       unmanagedCmdConfig
+-	upgrade         upgradeCmdConfig
+ 
+ 	// Common configuration.
+ 	interactiveTemplateFuncs interactiveTemplateFuncsConfig
+@@ -1870,7 +1869,6 @@ func (c *Config) newRootCmd() (*cobra.Command, error) {
+ 		c.newTargetPathCmd(),
+ 		c.newUnmanagedCmd(),
+ 		c.newUpdateCmd(),
+-		c.newUpgradeCmd(),
+ 		c.newVerifyCmd(),
+ 	} {
+ 		if cmd != nil {
+diff --git a/internal/cmd/doctorcmd.go b/internal/cmd/doctorcmd.go
+index 156668393..997f3650c 100644
+--- a/internal/cmd/doctorcmd.go
++++ b/internal/cmd/doctorcmd.go
+@@ -135,9 +135,6 @@ type suspiciousEntriesCheck struct {
+ 	encryptedSuffixes []string
+ }
+ 
+-// A upgradeMethodCheck checks the upgrade method.
+-type upgradeMethodCheck struct{}
+-
+ // A versionCheck checks the version information.
+ type versionCheck struct {
+ 	versionInfo VersionInfo
+@@ -195,7 +192,6 @@ func (c *Config) runDoctorCmd(cmd *cobra.Command, args []string) error {
+ 		systeminfoCheck{},
+ 		goVersionCheck{},
+ 		executableCheck{},
+-		upgradeMethodCheck{},
+ 		&configFileCheck{
+ 			basename: chezmoiRelPath,
+ 			bds:      c.bds,
+@@ -729,25 +725,6 @@ func (c *suspiciousEntriesCheck) Run(config *Config) (checkResult, string) {
+ 	return checkResultOK, "no suspicious entries"
+ }
+ 
+-func (upgradeMethodCheck) Name() string {
+-	return "upgrade-method"
+-}
+-
+-func (upgradeMethodCheck) Run(config *Config) (checkResult, string) {
+-	executable, err := os.Executable()
+-	if err != nil {
+-		return checkResultFailed, err.Error()
+-	}
+-	method, err := getUpgradeMethod(config.baseSystem.UnderlyingFS(), chezmoi.NewAbsPath(executable))
+-	if err != nil {
+-		return checkResultFailed, err.Error()
+-	}
+-	if method == "" {
+-		return checkResultOmitted, ""
+-	}
+-	return checkResultOK, method
+-}
+-
+ func (c *versionCheck) Name() string {
+ 	return "version"
+ }
