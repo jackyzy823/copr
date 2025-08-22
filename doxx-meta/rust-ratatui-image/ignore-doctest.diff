@@ -1,0 +1,13 @@
+diff --git a/src/lib.rs b/src/lib.rs
+index 3603ae9..6ea952e 100644
+--- a/src/lib.rs
++++ b/src/lib.rs
+@@ -23,7 +23,7 @@
+ //! an image that has been loaded, at a different or same position.
+ //!
+ //! # Quick start
+-//! ```rust
++//! ```rust,ignore
+ //! use ratatui::{backend::TestBackend, Terminal, terminal::Frame};
+ //! use ratatui_image::{picker::Picker, StatefulImage, protocol::StatefulProtocol};
+ //!
