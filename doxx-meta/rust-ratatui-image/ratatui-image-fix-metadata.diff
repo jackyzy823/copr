@@ -1,0 +1,11 @@
+--- ratatui-image-1.0.5/Cargo.toml	1970-01-01T00:00:01+00:00
++++ ratatui-image-1.0.5/Cargo.toml	2025-08-22T05:10:59.165978+00:00
+@@ -75,7 +75,7 @@
+ version = "0.8.5"
+ 
+ [dependencies.ratatui]
+-version = ">=0.23"
++version = ">=0.23,<0.28"
+ features = []
+ default-features = false
+ 
