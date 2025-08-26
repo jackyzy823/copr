@@ -1,0 +1,4 @@
+[tests]
+run = ["none"]
+comments = ["Disable tests because of missing test data (excluded in Cargo.toml by upstream)"]
+

@@ -1,0 +1,6 @@
+[package]
+summary = "Functions for normalization of Unicode strings"
+cargo-toml-patch-comments = [
+    "Exclude unneeded scripts: https://github.com/unicode-rs/unicode-normalization/pull/30",
+]
+

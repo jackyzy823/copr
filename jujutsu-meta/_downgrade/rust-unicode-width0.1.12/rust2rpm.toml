@@ -1,0 +1,14 @@
+[package]
+summary = "Determine displayed width of 'char' and 'str' types"
+cargo-toml-patch-comments = [
+    "exclude scripts that are only useful for upstream development",
+]
+
+[features]
+hide = [
+    "compiler_builtins",
+    "core",
+    "std",
+    "rustc-dep-of-std",
+]
+

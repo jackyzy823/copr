@@ -1,0 +1,11 @@
+--- unicode-normalization-0.1.23/Cargo.toml	1970-01-01T00:00:01+00:00
++++ unicode-normalization-0.1.23/Cargo.toml	2024-04-13T07:31:27.366766+00:00
+@@ -20,7 +20,7 @@
+ exclude = [
+     "target/*",
+     "Cargo.lock",
+-    "scripts/tmp",
++    "scripts/*",
+     "*.txt",
+     "tests/*",
+ ]
