@@ -1,0 +1,32 @@
+--- jj-cli-0.32.0/Cargo.toml	1970-01-01T00:00:01+00:00
++++ jj-cli-0.32.0/Cargo.toml	2025-08-26T07:43:40.568975+00:00
+@@ -93,21 +93,6 @@
+ path = "src/lib.rs"
+ 
+ [[bin]]
+-name = "fake-diff-editor"
+-path = "testing/fake-diff-editor.rs"
+-required-features = ["test-fakes"]
+-
+-[[bin]]
+-name = "fake-editor"
+-path = "testing/fake-editor.rs"
+-required-features = ["test-fakes"]
+-
+-[[bin]]
+-name = "fake-formatter"
+-path = "testing/fake-formatter.rs"
+-required-features = ["test-fakes"]
+-
+-[[bin]]
+ name = "jj"
+ path = "src/main.rs"
+ 
+@@ -184,7 +169,6 @@
+ 
+ [dependencies.crossterm]
+ version = "0.28"
+-features = ["windows"]
+ default-features = false
+ 
+ [dependencies.dunce]
