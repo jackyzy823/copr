@@ -1,0 +1,11 @@
+diff --git a/cmd/compiledb/main_test.go b/cmd/compiledb/main_test.go
+index c5a8e0d..86b6fa2 100644
+--- a/cmd/compiledb/main_test.go
++++ b/cmd/compiledb/main_test.go
+@@ -11,5 +11,6 @@ func TestParser(t *testing.T) {
+ 	log.Error("TestParser")
+ 	internal.ParseConfig.InputFile = "../../tests/build.log"
+ 	internal.ParseConfig.OutputFile = "compile_commands.json"
++	internal.ParseConfig.RegexFile = internal.RegexFile
+ 	internal.Generate()
+ }
