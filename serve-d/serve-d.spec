@@ -39,7 +39,7 @@ ExclusiveArch:  %{ldc_arches}
 
 Source0:        %{dub_source %name %version}
 
-## todo save packges to like /usr/share/dub/packages/xxxx.zip like rust
+## todo save packages to like /usr/share/dub/packages/xxxx.zip like rust
 ## use generate_requres -> read dub.selections.json and --> create something like dub(xxxx)
 
 # dub build --registry=file://<> --skip-registery=.....
@@ -92,8 +92,15 @@ BuildRequires:  dub
 BuildRequires:  ldc
 
 
-# requires dcd to complete code
-Recommends:     dcd-server
+# requires dcd-server to complete code
+#Recommends:     dcd-server
+# Note since serve-d internal dcd-client only supports dcd server from [0.8.0,0.14.0), so we recommends dcd-client too
+#Recommends:     dcd-client
+## so we use dcd meta-package
+Recommends:     dcd
+## Good to have a compiler
+Recommends:     ldc
+
 
 %global _description %{expand:
 Microsoft language server protocol implementation for D.
@@ -151,8 +158,8 @@ install -Dpm0755 -t %{buildroot}%{_bindir} %{name}
 dub --skip-registry=all --registry=file://%{_buildrootdir}/packages --cache local test --parallel  --compiler=ldc2 --build=%{_buildtype}
 
 %files
-%license
-%doc
+%license LICENSE
+%doc    README.md editor-*.md
 %{_bindir}/%{name}
 
 
