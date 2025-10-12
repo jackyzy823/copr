@@ -29,7 +29,7 @@ so
 `%setup -C -n %{_version}/%{name}-%{_version}` is the solution
 
 
-4. Aout d-rpm-macros desgin
+4. About d-rpm-macros desgin
 a) create a dub2rpm for fetching the init one and create .spec -> add BuildRequries: ldc/dub/d-rpm-macros
 dub2rpm xxxx -> find the latest version (use dub registry api https://code.dlang.org/api/packages/<packagename>/info) and download
 use ninja2 and template ....
@@ -38,3 +38,23 @@ use dub convert to convenrt dub.sdl to dub.json for read
 b) create a d-rpm-macros and (d-srpm-macros if we decide use /usr/share/dub/packages/....)
 
 
+5. for querying dependencies version or generating dub.selections.json
+dub describe --cache=local will create dub.selections.json
+
+~~call "https://code.dlang.org/api/packages/infos?packages=["dfmt"]&include_dependencies=true&minimize=true"~~
+
+
+Sample:
+import requests
+
+DUB_URL = ""
+
+## download zip
+
+## convert dub.sdl to dub.json if dub.sdl exists
+## parse dub.json 
+
+## generate dub.selections.json if not exists via dub describe
+## parse dub.selections.json
+
+## or parse result of dub describe

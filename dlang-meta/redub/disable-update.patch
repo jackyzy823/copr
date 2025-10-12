@@ -1,0 +1,20 @@
+diff --git a/source/redub/extensions/update.d b/source/redub/extensions/update.d
+index 3f5a717..63799ea 100644
+--- a/source/redub/extensions/update.d
++++ b/source/redub/extensions/update.d
+@@ -5,6 +5,8 @@ import redub.extensions.cli;
+ 
+ int updateMain(string[] args)
+ {
++    // early returned here instead of dropping "update" command in app.d to avoid "update" being recognized as a package.
++    return 0;
+     import core.runtime;
+     import redub.cli.dub;
+     import redub.logging;
+@@ -133,4 +135,4 @@ int updateMain(string[] args)
+     }
+     warn("Your redub version '", RedubVersionOnly, "' is already greater or equal than the latest redub version '", latest);
+     return 0;
+-}
+\ No newline at end of file
++}
