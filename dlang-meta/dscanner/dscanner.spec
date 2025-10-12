@@ -1,13 +1,13 @@
-%global _version    0.8.0-beta.18
+%global _version    0.16.0-beta.4
 %global _buildtype  release-debug
 
-Name:           serve-d
+Name:           dscanner
 Version:        %{gsub %{_version} - ~}
 Release:        %autorelease
-Summary:        Microsoft Language Server Protocol library and D Server
+Summary:        D-Scanner is a tool for analyzing D source code.
 
-License:        MIT
-URL:            https://github.com/Pure-D/serve-d
+License:        BSL-1.0
+URL:            https://github.com/dlang-community/D-Scanner
 
 ExclusiveArch:  %{ldc_arches}
 
@@ -38,67 +38,20 @@ Source0:        %{dub_source %name %version}
 # dub build --registry=file://<> --skip-registery=.....
 
 ## from dub.selections.json
-Source:         %{dub_source automem 0.6.10}
-Source:         %{dub_source botan 1.12.19}
-Source:         %{dub_source botan-math 1.0.3}
-Source:         %{dub_source cachetools 0.4.1}
 Source:         %{dub_source dcd 0.16.0-beta.2}
-Source:         %{dub_source dfmt 0.15.1}
-Source:         %{dub_source diet-complete 0.0.3}
-Source:         %{dub_source diet-ng 1.8.1}
-Source:         %{dub_source dscanner 0.16.0-beta.4}
-Source:         %{dub_source dub 1.38.0-beta.1}
+Source:         %{dub_source dsymbol 0.13.0}
 Source:         %{dub_source emsi_containers 0.9.0}
-Source:         %{dub_source eventcore 0.9.30}
-Source:         %{dub_source fuzzymatch 1.0.0}
 Source:         %{dub_source inifiled 1.3.3}
-Source:         %{dub_source isfreedesktop 0.1.1}
-Source:         %{dub_source libasync 0.8.6}
 Source:         %{dub_source libddoc 0.8.0}
 Source:         %{dub_source libdparse 0.23.2}
-Source:         %{dub_source memutils 1.0.10}
-Source:         %{dub_source mir-algorithm 3.22.1}
-Source:         %{dub_source mir-core 1.7.1}
-Source:         %{dub_source mir-cpuid 1.2.11}
-Source:         %{dub_source mir-ion 2.3.2}
-Source:         %{dub_source mir-linux-kernel 1.0.1}
-Source:         %{dub_source msgpack-d 1.0.5}
-Source:         %{dub_source openssl 3.3.3}
-Source:         %{dub_source openssl-static 1.0.5+3.0.8}
-Source:         %{dub_source requests 2.1.3}
-Source:         %{dub_source rm-rf 0.1.0}
-Source:         %{dub_source sdlfmt 0.1.1}
-Source:         %{dub_source sdlite 1.1.2}
-Source:         %{dub_source silly 1.1.1}
-Source:         %{dub_source standardpaths 0.8.2}
 Source:         %{dub_source stdx-allocator 2.77.5}
-Source:         %{dub_source taggedalgebraic 0.11.23}
-Source:         %{dub_source test_allocator 0.3.4}
-Source:         %{dub_source unit-threaded 0.10.8}
-Source:         %{dub_source vibe-container 1.3.1}
-Source:         %{dub_source vibe-core 2.8.4}
-Source:         %{dub_source vibe-d 0.9.8}
-Source:         %{dub_source xdgpaths 0.2.5}
-
 
 BuildRequires:  dub
 BuildRequires:  ldc
 
 
-# requires dcd-server to complete code
-#Recommends:     dcd-server
-# Note since serve-d internal dcd-client only supports dcd server from [0.8.0,0.14.0), so we recommends dcd-client too
-#Recommends:     dcd-client
-## so we use dcd meta-package
-Recommends:     dcd
-## Good to have a compiler
-Recommends:     ldc
-
-
 %global _description %{expand:
-Microsoft language server protocol implementation for D.
-
-The purpose of this project is to give every editor the same capabilities and editing features as code-d through the widely available Microsoft Language Server Protocol (LSP).
+%{summary}
 }
 
 %description %_description
@@ -123,7 +76,9 @@ for i, p in ipairs(source_nums) do
 end
 }
 
-%setup -n %{name}-%{_version}
+# dcd's dubhash is located in common/ folder, so when building, DUB_PACKAGING_DIR will be dcd-version/common (since it is a dcb:common package) so , the dir.dirName is dcd-version. Situation is not the same as d-scanner, dfmt , their dubhash is located under root folder, so -C -n %{_version}/%{name}-%{_version} is a must. (-C strip root under archive file, -n create with nested folder)
+## use <version>/<packgename>-<version> for all dubhash versioing d pacakge.
+%setup -C -n %{_version}/%{name}-%{_version}
 
 #TODO make this a %{dub_build} with --skip-registry=all --registry=file://%{_buildrootdir}/packages
 %build
@@ -141,24 +96,19 @@ dub --skip-registry=all --registry=file://%{_buildrootdir}/packages --cache loca
 
 
 %install
-install -Dpm0755 -t %{buildroot}%{_bindir} %{name}
+install -Dpm0755 -t %{buildroot}%{_bindir} bin/%{name}
 ## or
 #install -m 0755 -vd %{buildroot}%{_bindir}
 #install -m 0755 -vp %{name} %{buildroot}%{_bindir}
 
 
 %check
-## from test.sh -> test.bat
-dub --skip-registry=all --registry=file://%{_buildrootdir}/packages --cache local test :http --parallel  --compiler=ldc2 --build=%{_buildtype}
-dub --skip-registry=all --registry=file://%{_buildrootdir}/packages --cache local test :lsp --parallel  --compiler=ldc2 --build=%{_buildtype}
-dub --skip-registry=all --registry=file://%{_buildrootdir}/packages --cache local test :serverbase --parallel  --compiler=ldc2 --build=%{_buildtype}
-
-## general unittest
+#unit test
 dub --skip-registry=all --registry=file://%{_buildrootdir}/packages --cache local test --parallel  --compiler=ldc2 --build=%{_buildtype}
 
 %files
-%license LICENSE
-%doc    README.md editor-*.md
+%license LICENSE_1_0.txt
+%doc    README.md
 %{_bindir}/%{name}
 
 

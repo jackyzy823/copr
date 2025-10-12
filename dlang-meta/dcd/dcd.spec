@@ -1,10 +1,3 @@
-# debug info seem not works with D compiler
-# from https://src.fedoraproject.org/rpms/gtkd
-## TO include debug info , use --build=release-debug
-## see https://dub.pm/dub-reference/build_settings/#buildoptions
-## and https://dub.pm/dub-reference/buildtypes/#-buildrelease-debug
-#%global debug_package %{nil}
-
 %global _version    0.16.0-beta.3
 %global _buildtype  release-debug
 
@@ -43,8 +36,13 @@ Source0:        %{dub_source %name %version}
 #Source0:        https://github.com/dlang-community/%{_reponame}/archive/v%{_version}/%{_reponame}-v%{_version}.tar.gz
 
 ## todo save packages to like /usr/share/dub/packages/xxxx.zip like rust
-## use generate_requres -> read dub.selections.json and --> create something like dub(xxxx)
-## determine executable/library in targetType in configurations via dub.json and generate package with name in configurations
+## use generate_requres -> read dub.json (not dub.selection.json) and calc best version --> create something like dub(xxxx)
+## or just like rust2rpm -> fetch / parse and write to ? (create a dub2rpm)
+## TODO create multiple source version and how to use/match
+## determine executable/library in targetType in (configurations and the root object) via dub.json and generate package with name in configurations, note targetType has `autodetect`.
+## descrption from descrption in dub.json
+## package name from name in dub.json
+## %install and %files  accroding to targetPath and targetName
 ## if library , save as xxx-devel with source code , for others' buildrequires.
 ## dub.sdl could be converted to dub.json via dub convert
 
@@ -163,6 +161,8 @@ install -Dpm0644 -t %{buildroot}%{bash_completions_dir} bash-completion/completi
 
 
 %check
+## general unittest
+dub --skip-registry=all --registry=file://%{_buildrootdir}/packages --cache local test --parallel  --compiler=ldc2 --build=%{_buildtype}
 pushd tests
 ## set DC to run: tests/extra/tc_ufcs_all_kinds/run.sh
 DC=ldc2 ./run_tests.sh --extra
