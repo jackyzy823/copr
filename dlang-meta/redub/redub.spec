@@ -1,4 +1,4 @@
-%global _version    1.25.4
+%global _version    1.25.5
 %global _buildtype  release-debug
 
 Name:           redub
@@ -81,7 +81,8 @@ end
 ## use <version>/<packgename>-<version> for all dubhash versioing d pacakge.
 %autosetup -C -n %{_version}/%{name}-%{_version} -p1
 ## see: https://github.com/dlang/dub/issues/3077
-rm dub.selections.json
+## redub fixed this on https://github.com/MrcSnm/redub/commit/03eda61b3de3e5944fa88f01a802c8ea51e04d87
+#rm dub.selections.json
 
 #TODO make this a %{dub_build} with --skip-registry=all --registry=file://%{_buildrootdir}/packages
 %build
