@@ -3,6 +3,7 @@
 
 # https://github.com/twpayne/chezmoi
 %global goipath         github.com/twpayne/chezmoi
+%global release_commit	9b1def1eff7c581272ffeb7f707e7af80ec434b1
 Version:                2.64.0
 
 %gometa -L -f
@@ -21,8 +22,6 @@ Source1:        %{archivename}-vendor.tar.bz2
 Source2:        go-vendor-tools.toml
 
 BuildRequires:  go-vendor-tools
-
-Patch0:         disable-upgrade.diff
 
 Suggests:       git-core
 Suggests:       age
@@ -49,15 +48,17 @@ Manage your dotfiles across multiple diverse machines, securely.
 %goprep -A
 %setup -q -T -D -a1 %{forgesetupargs}
 %autopatch -p1
-# disable upgrade
-rm  internal/cmd/upgradecmd.go internal/cmd/upgradecmd_test.go internal/cmd/upgradecmd_unix.go internal/cmd/upgradecmd_windows.go
 
 %generate_buildrequires
 %go_vendor_license_buildrequires -c %{S:2}
 
 %build
 %global gomodulesmode GO111MODULE=on
-%define currentgoldflags -X main.version=%{version} ${currentgoldflags}
+export GO_LDFLAGS="-X main.version=%{version} \
+			-X main.builtBy=Copr  \
+			-X main.commit=%{release_commit} \
+			-X main.date=$(date -d "@${SOURCE_DATE_EPOCH}" +%Y-%m-%dT%H:%M:%SZ)"
+export GO_BUILDTAGS="noupgrade"
 %gobuild -o %{gobuilddir}/bin/chezmoi %{goipath}
 
 %install
