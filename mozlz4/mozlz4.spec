@@ -4,8 +4,11 @@
 # prevent library files from being installed
 %global cargo_install_lib 0
 
+%global commit d003163712347b2aa5e88396281ee0cb511d4638
+%global shortcommit %{sub %{commit} 1 7}
+
 Name:           mozlz4
-Version:        0.1.0
+Version:        0.1.0^1.%{shortcommit}
 Release:        %autorelease
 Summary:        Decompress / compress mozlz4 files, with precompiled binaries for Windows and Linux.
 
@@ -20,7 +23,8 @@ License:        (0BSD OR MIT OR Apache-2.0) AND (Apache-2.0 OR MIT) AND (MIT OR 
 # LICENSE.dependencies contains a full license breakdown
 
 URL:            https://github.com/jusw85/mozlz4
-Source:         %{url}/archive/v%{version}/%{name}-v%{version}.tar.gz
+#Source:         %{url}/archive/v%{version}/%{name}-v%{version}.tar.gz
+Source:         %{url}/archive/%{commit}/%{name}-%{shortcommit}.tar.gz
 # Manually created patch for downstream crate metadata changes
 Patch:          mozlz4-fix-metadata.diff
 
@@ -35,7 +39,7 @@ BuildRequires: (crate(cc/default) >= 1.0.0 with crate(cc/default) < 2.0.0~)
 %description %{_description}
 
 %prep
-%autosetup -n mozlz4-%{version} -p1
+%autosetup -n mozlz4-%{commit} -p1
 %cargo_prep
 
 
