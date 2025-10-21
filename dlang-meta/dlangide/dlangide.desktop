@@ -1,0 +1,16 @@
+[Desktop Entry]
+Name=Dlang IDE
+GenericName=Integrated Development Environment
+Comment=Edit d files and workspaces
+Icon=dlangide
+TryExec=dlangide
+# https://github.com/buggins/dlangide/blob/94ee17177faaa4b372bcba27549006fc29e8fbab/src/dlangide/workspace/workspace.d#L48
+# https://github.com/buggins/dlangide/blob/94ee17177faaa4b372bcba27549006fc29e8fbab/src/dlangide/workspace/project.d#L19
+# able to open workspace file: .dlangidews or project file: dub.json/DUB.JSON/dub.sdl/DUB.SDL/package.json
+Exec=dlangide %F
+Terminal=false
+Type=Application
+Keywords=dlang;dlangide;
+Categories=TextEditor;Development;IDE;
+StartupNotify=false
+MimeType=text/x-dlangidews

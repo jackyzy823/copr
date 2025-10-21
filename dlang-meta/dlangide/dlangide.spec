@@ -7,7 +7,7 @@ Release:        %autorelease
 Summary:        D language IDE based on DlangUI
 
 License:        BSL-1.0
-URL:            https://github.com/buggins/dlangide
+URL:            https://github.com/buggins/%{name}
 
 ExclusiveArch:  %{ldc_arches}
 
@@ -31,6 +31,7 @@ ExclusiveArch:  %{ldc_arches}
 }
 
 Source0:        %{dub_source %name %version}
+Source1:	%{name}.desktop
 
 ## todo save packages to like /usr/share/dub/packages/xxxx.zip like rust
 ## use generate_requres -> read dub.selections.json and --> create something like dub(xxxx)
@@ -66,6 +67,18 @@ BuildRequires:  SDL2-devel
 ## built failed due to without lz when linking
 BuildRequires:  pkgconfig(zlib)
 
+BuildRequires:	desktop-file-utils
+
+# TODO alternative config like : minimal, console, x11 (and split to multi packages?)
+
+## BUG: resource document-new not found , this is a bug of dlangide (lack of document-new.png)
+
+## runtime error: bindbc-freetype requires freetype shared library
+## bindbc-freetype will find libfreetype.so (which is in devel, libfreetype.so.6 in normal package)
+Requires:	freetype-devel
+
+Recommends:	ldc
+Recommends:	dub
 
 %global _description %{expand:
 %{summary}
@@ -87,7 +100,8 @@ BuildRequires:  pkgconfig(zlib)
 print(rpm.expand('mkdir %{_buildrootdir}/packages \n'))
 
 for i, p in ipairs(source_nums) do
-    if p ~= 0 then
+-- we have desktop file so skip one more
+    if p > 1 then
         print(rpm.expand('cp ' .. sources[i] .. ' %{_buildrootdir}/packages\n'))
     end
 end
@@ -117,6 +131,9 @@ install -Dpm0755 -t %{buildroot}%{_bindir} bin/%{name}
 ## or
 #install -m 0755 -vd %{buildroot}%{_bindir}
 #install -m 0755 -vp %{name} %{buildroot}%{_bindir}
+desktop-file-install --dir=%{buildroot}%{_datadir}/applications %{SOURCE1}
+install -Dpm0644 views/res/mdpi/dlangui-logo1.png %{buildroot}%{_datadir}/pixmaps/%{name}.png
+
 
 
 %check
@@ -125,7 +142,8 @@ install -Dpm0755 -t %{buildroot}%{_bindir} bin/%{name}
 %license LICENSE.txt
 %doc    README.md
 %{_bindir}/%{name}
-
+%{_datadir}/applications/%{name}.desktop
+%{_datadir}/pixmaps/%{name}.png
 
 %changelog
 %autochangelog
