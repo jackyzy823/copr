@@ -1,0 +1,58 @@
+diff --git a/dexed-d/dub.json b/dexed-d/dub.json
+index 44cc2402..900dca68 100644
+--- a/dexed-d/dub.json
++++ b/dexed-d/dub.json
+@@ -4,16 +4,11 @@
+   "targetPath" : "../bin",
+   "targetName" : "dexed-d",
+   "dependencies" : {
+-    "libdparse" : {
+-      "path" : "../etc/libdparse"
+-    }
++    "libdparse" : "0.23.2"
+   },
+-  "dflags-linux" : [
+-    "-link-defaultlib-shared=false"
+-  ],
+   "dflags-windows" : [
+     "-link-defaultlib-shared=false",
+     "-fvisibility=public",
+-    "-dllimport=none",
+-  ],
++    "-dllimport=none"
++  ]
+ }
+diff --git a/lazproj/dexed.lpi b/lazproj/dexed.lpi
+index 036c3b82..1f1834ae 100644
+--- a/lazproj/dexed.lpi
++++ b/lazproj/dexed.lpi
+@@ -450,9 +450,6 @@
+               <Define0 Value="RELEASE"/>
+               <Define1 Value="GTK_REMOVE_CLIPBOARD_NULL"/>
+             </OtherDefines>
+-            <ExecuteBefore>
+-              <Command Value="dub build --build=debug --compiler=ldc2 --root=..\dexed-d"/>
+-            </ExecuteBefore>
+           </Other>
+         </CompilerOptions>
+       </Item2>
+@@ -500,9 +497,6 @@
+           </Linking>
+           <Other>
+             <CustomOptions Value="-dDEBUG"/>
+-            <ExecuteBefore>
+-              <Command Value="dub build --compiler=ldc2 --root=..\dexed-d"/>
+-            </ExecuteBefore>
+           </Other>
+         </CompilerOptions>
+       </Item3>
+@@ -941,9 +935,6 @@
+         <Define0 Value="RELEASE"/>
+         <Define1 Value="GTK_REMOVE_CLIPBOARD_NULL"/>
+       </OtherDefines>
+-      <ExecuteBefore>
+-        <Command Value="dub build --build=release --compiler=ldc2 --root=..\dexed-d"/>
+-      </ExecuteBefore>
+     </Other>
+   </CompilerOptions>
+   <Debugging>

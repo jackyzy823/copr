@@ -1,0 +1,11 @@
+# from rpm.sh
+[Desktop Entry]
+Categories=Application;IDE;Development;
+Exec=dexed %f
+GenericName=dexed
+Icon=dexed
+Keywords=editor;Dlang;IDE;dmd;
+Name=dexed
+StartupNotify=true
+Terminal=false
+Type=Application
