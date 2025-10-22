@@ -1,5 +1,5 @@
 Name: heidisql
-Version: 12.11.1.167
+Version: 12.12
 Release: %autorelease
 Summary: A lightweight client for managing MariaDB, MySQL, SQL Server, PostgreSQL, SQLite, Interbase and Firebird, written in Delphi
 
@@ -8,7 +8,7 @@ Summary: A lightweight client for managing MariaDB, MySQL, SQL Server, PostgreSQ
 #     see source/main.lfm -> ImageListIcon8: TImageList
 License: GPL-2.0-only
 URL: https://github.com/HeidiSQL/HeidiSQL/tree/lazarus
-Source: https://github.com/HeidiSQL/HeidiSQL/archive/refs/tags/%{version}.tar.gz
+Source: https://github.com/HeidiSQL/HeidiSQL/archive/refs/tags/%{version}-Linux.tar.gz
 
 BuildRequires: lazarus-tools
 BuildRequires: lazarus-lcl-gtk2
@@ -26,7 +26,7 @@ Requires: sqlite-libs
 %{summary}
 
 %prep
-%autosetup -n HeidiSQL-%{version} -p1
+%autosetup -n HeidiSQL-%{version}-Linux -p1
 
 %build
 # inject version string to lpi file
