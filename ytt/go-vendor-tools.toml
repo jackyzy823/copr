@@ -1,0 +1,13 @@
+[archive]
+
+[licensing]
+detector = "askalono"
+[[licensing.licenses]]
+path = "vendor/github.com/aws/aws-lambda-go/LICENSE-SUMMARY"
+sha256sum = "00c31061d11a7d289e3f5ac49f58b0d5cffdd9d1d24a9ee4c9848354356386bc"
+expression = "(LicenseRef-scancode-proprietary-license AND LicenseRef-scancode-unknown-license-reference) AND (Apache-2.0 AND LicenseRef-scancode-unknown-license-reference)"
+
+[[licensing.licenses]]
+path = "vendor/gopkg.in/yaml.v3/LICENSE"
+sha256sum = "d18f6323b71b0b768bb5e9616e36da390fbd39369a81807cca352de4e4e6aa0b"
+expression = "MIT AND (MIT AND Apache-2.0)"
