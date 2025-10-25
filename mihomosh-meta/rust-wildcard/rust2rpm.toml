@@ -1,0 +1,4 @@
+[package]
+cargo-toml-patch-comments = [
+    "drop unused, benchmark-only criterion, wildmatch dev-dependency, add feature flag serde_derive for serde",
+]

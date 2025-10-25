@@ -1,0 +1,43 @@
+--- libyml-0.0.5/Cargo.toml	1970-01-01T00:00:01+00:00
++++ libyml-0.0.5/Cargo.toml	2025-10-25T08:45:33.986949+00:00
+@@ -107,14 +107,6 @@
+ path = "src/lib.rs"
+ doc-scrape-examples = false
+ 
+-[[bin]]
+-name = "run-emitter-test-suite"
+-path = "src/bin/run-emitter-test-suite.rs"
+-
+-[[bin]]
+-name = "run-parser-test-suite"
+-path = "src/bin/run-parser-test-suite.rs"
+-
+ [[example]]
+ name = "apis"
+ path = "examples/apis/main.rs"
+@@ -140,10 +132,6 @@
+ path = "tests/test_dumper.rs"
+ 
+ [[test]]
+-name = "test_emitter"
+-path = "tests/test_emitter.rs"
+-
+-[[test]]
+ name = "test_internal"
+ path = "tests/test_internal.rs"
+ 
+@@ -162,14 +150,6 @@
+ [[test]]
+ name = "test_memory"
+ path = "tests/test_memory.rs"
+-
+-[[test]]
+-name = "test_parser"
+-path = "tests/test_parser.rs"
+-
+-[[test]]
+-name = "test_parser_error"
+-path = "tests/test_parser_error.rs"
+ 
+ [[test]]
+ name = "test_string"

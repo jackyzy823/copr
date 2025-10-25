@@ -1,0 +1,4 @@
+[package]
+cargo-toml-patch-comments = [
+    "remove unused bin and remove failed tests due to dependecies is path based",
+]

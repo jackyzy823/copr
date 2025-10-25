@@ -1,0 +1,10 @@
+--- mihomosh-2.0.0/Cargo.toml	2025-10-25T07:26:17.528614+00:00
++++ mihomosh-2.0.0/Cargo.toml	2025-10-25T07:30:19.651798+00:00
+@@ -2,6 +2,7 @@
+ name = "mihomosh"
+ version = "2.0.0"
+ edition = "2024"
++license = "GPL-3.0-or-later"
+ 
+ [profile.release]
+ strip = true
