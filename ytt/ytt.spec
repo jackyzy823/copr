@@ -42,7 +42,30 @@ YAML templating tool that works on YAML structure instead of text.
 ## to pass the test and make function like `version.require_at_least("0.0.0")` work.
 export GO_LDFLAGS="-X carvel.dev/ytt/pkg/version.Version=%{version}"
 %global gomodulesmode GO111MODULE=on
+
+## build binary to template all website assets into a single Go file
 ## exlucde ytt-lambda-website
+for cmd in cmd/* ; do
+  if [[ "ytt-lambda-website" == $(basename $cmd) ]] ; then continue; fi
+  %gobuild -o %{gobuilddir}/bin/$(basename $cmd) %{goipath}/$cmd
+done
+
+## see https://github.com/carvel-dev/ytt/blob/develop/hack/generate-website-assets.sh
+## and https://github.com/carvel-dev/ytt/blob/develop/hack/build.sh
+pushd pkg/website
+%{gobuilddir}/bin/%{name} -f . \
+		-f ../../examples/playground/basics \
+		-f ../../examples/playground/overlays \
+		-f ../../examples/playground/getting-started \
+		--file-mark 'alt-example**/*:type=data' \
+		--file-mark 'example**/*:type=data' \
+		--file-mark 'generated.go.txt:exclusive-for-output=true' \
+		--dangerous-emptied-output-directory ../../tmp/
+popd
+mv tmp/generated.go.txt pkg/website/generated.go
+
+## build again
+rm %{gobuilddir}/bin/%{name}
 for cmd in cmd/* ; do
   if [[ "ytt-lambda-website" == $(basename $cmd) ]] ; then continue; fi
   %gobuild -o %{gobuilddir}/bin/$(basename $cmd) %{goipath}/$cmd
