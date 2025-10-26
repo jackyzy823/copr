@@ -13,6 +13,7 @@ Summary:        LSP server implementation for Pascal
 License:        GPL-3.0-or-later
 URL:            https://github.com/genericptr/pascal-language-server
 Source0:        %{url}/archive/%{commit}/%{name}-%{shortcommit}.tar.gz
+Patch0:         https://github.com/genericptr/pascal-language-server/commit/5202e1a0c852f2dfe23825a060246978a49ecaf8.patch
 
 BuildRequires: lazarus-tools
 BuildRequires: lazarus-lcl-gtk2
@@ -23,7 +24,11 @@ BuildRequires: pkgconfig(sqlite3)
 
 
 %prep
-%autosetup -n %{name}-%{commit} -p1
+%setup -n %{name}-%{commit}
+%if 0%{?fedora} < 42
+# fix build with old fpc/lazarus
+%patch -p1 0
+%endif
 
 
 %build
