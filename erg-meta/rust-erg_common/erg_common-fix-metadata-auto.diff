@@ -1,0 +1,21 @@
+--- erg_common-0.6.53/Cargo.toml	1970-01-01T00:00:01+00:00
++++ erg_common-0.6.53/Cargo.toml	2025-10-26T08:03:45.252250+00:00
+@@ -30,11 +30,9 @@
+ [features]
+ backtrace = [
+     "dep:backtrace-on-stack-overflow",
+-    "dep:w-boson",
+ ]
+ debug = [
+     "dep:backtrace-on-stack-overflow",
+-    "dep:w-boson",
+ ]
+ default = ["parallel"]
+ els = []
+@@ -79,6 +77,3 @@
+ version = "0.3.0"
+ optional = true
+ 
+-[target."cfg(windows)".dependencies.w-boson]
+-version = "0.1.0"
+-optional = true
