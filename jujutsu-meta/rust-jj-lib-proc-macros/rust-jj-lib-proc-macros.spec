@@ -5,7 +5,7 @@
 %global crate jj-lib-proc-macros
 
 Name:           rust-jj-lib-proc-macros
-Version:        0.32.0
+Version:        0.33.0
 Release:        %autorelease
 Summary:        Proc macros for the jj-lib crate
 
