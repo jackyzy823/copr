@@ -7,7 +7,7 @@
 %global crate jj-lib
 
 Name:           rust-jj-lib
-Version:        0.33.0
+Version:        0.34.0
 Release:        %autorelease
 Summary:        Library for Jujutsu - an experimental version control system
 

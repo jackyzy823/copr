@@ -6,7 +6,7 @@
 %global crate jj-cli
 
 Name:           jujutsu
-Version:        0.33.0
+Version:        0.34.0
 Release:        %autorelease
 Summary:        Jujutsu - an experimental version control system
 

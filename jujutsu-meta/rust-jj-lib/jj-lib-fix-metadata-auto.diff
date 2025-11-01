@@ -1,6 +1,6 @@
---- jj-lib-0.33.0/Cargo.toml	1970-01-01T00:00:01+00:00
-+++ jj-lib-0.33.0/Cargo.toml	2025-10-31T03:11:45.229508+00:00
-@@ -252,9 +252,6 @@
+--- jj-lib-0.34.0/Cargo.toml	1970-01-01T00:00:01+00:00
++++ jj-lib-0.34.0/Cargo.toml	2025-11-01T14:19:29.324777+00:00
+@@ -249,9 +249,6 @@
  version = "0.30.1"
  features = ["fs"]
  
@@ -10,7 +10,7 @@
  [lints.clippy]
  explicit_iter_loop = "warn"
  flat_map_option = "warn"
-@@ -265,3 +262,4 @@
+@@ -262,3 +259,4 @@
  unused_trait_names = "warn"
  use_self = "warn"
  useless_conversion = "warn"
