@@ -15,6 +15,8 @@ Source:         %{crates_source}
 Patch:          mergiraf-fix-metadata.diff
 
 BuildRequires:  cargo-rpm-macros >= 24
+## some tests requires git
+BuildRequires:	git-core
 
 %global _description %{expand:
 A syntax-aware merge driver for Git.}

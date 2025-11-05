@@ -65,7 +65,8 @@ use the "default" feature of the "%{crate}" crate.
 
 %if %{with check}
 %check
-## output of tests/ui/matrix.rs slightly different
+## output of tests/ui/matrix.rs slightly different in different rust version
+## Ref: https://github.com/evenfurther/pathfinding/commit/2024b1621b5b7878497c8a098164ee5527953d85
 %cargo_test -- -- --skip ui
 %endif
 
