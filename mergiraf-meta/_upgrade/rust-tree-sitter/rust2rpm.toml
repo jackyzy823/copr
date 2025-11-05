@@ -1,0 +1,41 @@
+[package]
+cargo-toml-patch-comments = [
+    "Fixup license for bundled ICU",
+    "Drop 'wasmtime' features",
+    "Make 'bindgen' required",
+]
+license-files = { include = ["LICENSE"] }
+
+[[package.extra-sources]]
+comments = ["Upstream license file - tree-sitter/tree-sitter#1520"]
+file = "https://github.com/tree-sitter/tree-sitter/raw/v%{version}/LICENSE#/LICENSE.upstream"
+number = 2
+
+[[package.extra-patches]]
+comments = ["Always generate bindings with bindgen"]
+file = "tree-sitter-build-bindings-unconditionally.patch"
+number = 2
+
+[[package.extra-patches]]
+comments = ["Fix rust-version detection in build.rs"]
+file = "tree-sitter-bindgen-rust-version.patch"
+number = 3
+
+[features]
+hide = ["wasm"]
+
+[scripts.prep]
+post = [
+    "# drop pre-generated bindings; we don't want to accidentally use these",
+    "rm -f binding_rust/bindings.rs",
+]
+
+[scripts.install]
+post = [
+    "# prepare upstream license file for %%license",
+    "install -D -m 0644 -pv %{SOURCE2} %{buildroot}%{crate_instdir}/LICENSE",
+]
+
+[tests]
+run = ["none"]
+comments = ["The crate ships without the data or additional sources required for tests"]
