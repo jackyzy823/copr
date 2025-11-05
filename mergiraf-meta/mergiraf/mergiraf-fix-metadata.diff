@@ -1,0 +1,11 @@
+--- mergiraf-0.15.0/Cargo.toml	1970-01-01T00:00:01+00:00
++++ mergiraf-0.15.0/Cargo.toml	2025-11-05T11:22:17.974981+00:00
+@@ -238,7 +238,7 @@
+ version = "2"
+ 
+ [dependencies.zip]
+-version = "5.1.1"
++version = "3"
+ features = ["deflate"]
+ default-features = false
+ 

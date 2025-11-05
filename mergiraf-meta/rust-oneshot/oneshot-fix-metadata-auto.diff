@@ -1,0 +1,22 @@
+--- oneshot-0.1.11/Cargo.toml	1970-01-01T00:00:01+00:00
++++ oneshot-0.1.11/Cargo.toml	2025-11-05T10:40:34.202517+00:00
+@@ -141,14 +141,6 @@
+     "time",
+ ]
+ 
+-[target."cfg(criterion)".dev-dependencies.criterion]
+-version = "0.5.1"
+-
+-[target."cfg(oneshot_loom)".dependencies.loom]
+-version = "0.7.2"
+-features = ["futures"]
+-optional = true
+-
+ [lints.rust.unexpected_cfgs]
+ level = "deny"
+ priority = 0
+@@ -157,3 +149,4 @@
+     "cfg(oneshot_test_delay)",
+     "cfg(criterion)",
+ ]
++

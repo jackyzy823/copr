@@ -1,0 +1,23 @@
+[package]
+cargo-toml-patch-comments = [
+  "include LICENSE",
+]
+license-files = [
+  "LICENSE",
+]
+
+[[package.extra-sources]]
+number = 2
+file = "https://raw.githubusercontent.com/tree-sitter-grammars/%{crate}/refs/tags/v%{version}/LICENSE"
+comments = [
+  "include license file",
+  "https://github.com/tree-sitter-grammars/tree-sitter-yaml/pull/20",
+]
+
+[scripts.prep]
+post = [
+  """\
+# copy in license file
+cp -p %{SOURCE2} .\
+""",
+]

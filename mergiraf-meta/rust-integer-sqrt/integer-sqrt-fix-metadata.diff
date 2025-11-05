@@ -1,0 +1,10 @@
+--- integer-sqrt-0.1.5/Cargo.toml	2020-09-09T09:43:59+00:00
++++ integer-sqrt-0.1.5/Cargo.toml	2025-11-05T11:27:54.770312+00:00
+@@ -16,7 +16,6 @@
+ authors = ["Richard Dodd <richard.o.dodd@gmail.com>", "Joseph Richey", "Sergei Shulepov"]
+ include = ["src/**/*.rs", "Cargo.toml"]
+ description = "An implementation of integer square root algorithm for primitive rust types"
+-readme = "README.md"
+ keywords = ["integer", "square", "root", "isqrt", "sqrt"]
+ categories = ["algorithms", "no-std"]
+ license = "Apache-2.0/MIT"
