@@ -1,0 +1,37 @@
+diff -up ./hatch_build.py.ori ./hatch_build.py
+--- ./hatch_build.py.ori	2025-11-07 07:30:44.534133043 +0000
++++ ./hatch_build.py	2025-11-07 07:30:42.852840170 +0000
+@@ -18,6 +18,33 @@ class CustomBuildHook(BuildHookInterface
+             subprocess.run(["bun", "install"], check=True)
+             subprocess.run(["bun", "--bun", "run", "bundle"], check=True)
+ 
++        # we have meriyah and astring in node_modules already, no need to install them.
++        ## note we bundle dep + src together in core
++        ## so lib.min.js is just a empty stub file exports `lib`
++        ## export src as `jsc(input)`
++
++        elif shutil.which("esbuild"):
++            print("Building with esbuild...", flush=True)
++            subprocess.run(["esbuild", "--bundle",
++                            "--outfile=dist/yt.solver.core.min.js",
++                            "--format=iife",
++                            "--minify",
++                            "--global-name=jsc",
++                            # "--platform=node",
++                            "--banner:js=/* SPDX-License-Identifier: Unlicense */"
++                            ],
++                           ## to export `jsc` as function instead of { default: [Getter] }
++                           ## see: https://github.com/evanw/esbuild/issues/3740
++                           input = b"""import main from "./src/yt/solver/main.ts";\nmodule.exports=main;\n""")
++            subprocess.run(["esbuild", "--bundle",
++                            "--outfile=dist/yt.solver.lib.min.js",
++                            "--format=iife",
++                            "--minify",
++                            "--global-name=lib",
++                            # "--platform=node",
++                            "--banner:js=/* SPDX-License-Identifier: Unlicense */"
++                            ], input = b"")
++
+         elif shutil.which("npm"):
+             print("Building with npm...", flush=True)
+             # npm is a batch file (`npm.cmd`) on windows, which requires `shell=True`
