@@ -2,7 +2,7 @@
 %global         srcname yt_dlp_ejs
 %global         pypi_name %{gsub %{srcname} _ -}
 Name:           python-%{pypi_name}
-Version:        0.3.0
+Version:        0.3.1
 Release:        %autorelease
 Summary:        External JavaScript for yt-dlp supporting many runtimes
 
@@ -63,9 +63,17 @@ cp -p %{SOURCE3} .
 
 %check
 %pyproject_check_import
+## unit test for 0.3.1 +
+## NOTE: since js file is not in import path: current folder, this test won't work without copying js file to yt_dlp_ejs folder
+# just like .github/workflows/ci.yml , it unzip wheel and update js files to yt_dlp_ejs folder , we copy it
+cp dist/yt.solver.core.min.js yt_dlp_ejs/yt/solver/core.min.js
+cp dist/yt.solver.lib.min.js yt_dlp_ejs/yt/solver/lib.min.js
+## https://docs.fedoraproject.org/en-US/packaging-guidelines/Python/#py3_test_envvars
+%{py3_test_envvars} %{python3} -m unittest
+
 ## test with nodejs
-export PYTHONPATH="${PYTHONPATH:-%{buildroot}%{python3_sitearch}:%{buildroot}%{python3_sitelib}}"
-%{__python3} tests.py | /usr/bin/node-24
+# since js are copied, sys.path hack could be removed.
+%{py3_test_envvars} %{python3} tests.py | /usr/bin/node-24
 
 ## Otherwise test with yt-dlp's test_ejs_integration.py
 # install pytest , download yt-dlp source code

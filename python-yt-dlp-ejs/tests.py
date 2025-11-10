@@ -1,7 +1,3 @@
-import sys
-# Don't find in current directory since it lacks *.js in solver folder
-sys.path.pop(0)
-
 import yt_dlp_ejs.yt.solver
 
 ## data generated from https://github.com/yt-dlp/yt-dlp/blob/7af6d81f35aea8832023daa30ada10e6673a0529/test/test_jsc/test_ejs_integration.py#L121
