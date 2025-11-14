@@ -6,7 +6,8 @@ Version:        0.3.1
 Release:        %autorelease
 Summary:        External JavaScript for yt-dlp supporting many runtimes
 
-License:        Unlicense
+# astring MIT meriyah ISC
+License:        Unlicense AND ISC AND MIT
 URL:            https://github.com/ytdlp/ejs
 Source:         %{pypi_source %{srcname}}
 
