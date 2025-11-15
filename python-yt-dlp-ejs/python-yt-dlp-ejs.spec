@@ -61,6 +61,8 @@ cp -p %{SOURCE3} .
 %install
 %pyproject_install
 %pyproject_save_files -l %{srcname}
+install -Dpm0644 -t LICENSE.bundled/astring node_modules/astring/LICENSE
+install -Dpm0644 -t LICENSE.bundled/meriyah node_modules/meriyah/LICENSE.md
 
 %check
 %pyproject_check_import
@@ -82,6 +84,7 @@ cp dist/yt.solver.lib.min.js yt_dlp_ejs/yt/solver/lib.min.js
 
 
 %files -n python3-%{pypi_name} -f %{pyproject_files}
+%license LICENSE LICENSE.bundled/
 %doc README.md
 
 %changelog
