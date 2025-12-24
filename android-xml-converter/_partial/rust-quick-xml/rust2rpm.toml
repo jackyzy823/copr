@@ -1,0 +1,15 @@
+[package]
+cargo-toml-patch-comments = [
+    "drop unused, benchmark-only criterion dev-dependency",
+]
+
+[requires]
+build = [
+    "dos2unix",
+]
+
+[scripts]
+prep.post = [
+    "find -type f -exec dos2unix --keepdate {} +",
+]
+

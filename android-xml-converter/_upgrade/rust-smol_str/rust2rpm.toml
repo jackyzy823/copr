@@ -1,0 +1,10 @@
+[package]
+cargo-toml-patch-comments = [
+    "drop unused optional support for borsh",
+]
+
+[tests]
+skip = ["check_code_formatting"]
+skip-exact = true
+comments = ["skip a test that requires running rustfmt"]
+
