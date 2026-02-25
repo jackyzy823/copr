@@ -1,0 +1,24 @@
+[general]
+go_mod_dir = "v2025"
+
+[archive]
+pre_commands = [
+    ["cp", "v2025/LICENSE", "."],
+]
+
+[licensing]
+detector = "askalono"
+[[licensing.licenses]]
+path = "v2025/LICENSE"
+sha256sum = "f7a9b2f7dcb0b5756575915c2d36da1b1e13488a3ff42f30e9d4f6f8d4773646"
+expression = "MPL-2.0 AND LicenseRef-scancode-unknown-license-reference"
+
+[[licensing.licenses]]
+path = "v2025/vendor/github.com/urnetwork/connect/v2025/LICENSE"
+sha256sum = "f7a9b2f7dcb0b5756575915c2d36da1b1e13488a3ff42f30e9d4f6f8d4773646"
+expression = "MPL-2.0 AND LicenseRef-scancode-unknown-license-reference"
+
+[[licensing.licenses]]
+path = "v2025/vendor/github.com/urnetwork/userwireguard/v2025/LICENSE"
+sha256sum = "f7a9b2f7dcb0b5756575915c2d36da1b1e13488a3ff42f30e9d4f6f8d4773646"
+expression = "MPL-2.0 AND LicenseRef-scancode-unknown-license-reference"
