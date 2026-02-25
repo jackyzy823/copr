@@ -27,6 +27,7 @@ BuildRequires:  python3-devel
 ## so we force use node24-devel, and don't use %{__nodejs} macro , instead of fixed path
 BuildRequires:	nodejs24-devel
 
+# TODO future version requires esbuild having "--abs-paths" flag which is not presented in 0.24.2, so min is 0.27
 BuildRequires:  golang-github-evanw-esbuild
 
 
@@ -55,6 +56,8 @@ cp -p %{SOURCE3} .
 
 
 %build
+# TODO: future use
+# export EJS_BUILD_SKIP_INSTALL=1
 %pyproject_wheel
 
 
