@@ -11,9 +11,12 @@ Release:        %{autorelease}
 Summary:        Full-featured Telegram client library for Python 3
 
 License:        MIT
-URL:            https://github.com/LonamiWebs/Telethon
+URL:            https://codeberg.org/Lonami/Telethon
 Source0:        %{pypi_source}
 BuildArch:      noarch
+
+# fix asyncio loop issue in Python 3.14
+Patch0:		https://codeberg.org/Lonami/Telethon/commit/577812be4dd5932c463322b85b6829cedaa58a09.patch
 
 #BuildRequires:  python3-devel
 #BuildRequires:  python3dist(setuptools)
@@ -28,25 +31,22 @@ Summary:        %{summary}
 #Requires:       python3dist(pyaes)
 #Requires:       python3dist(rsa)
 
-## cryptg is a python binding for a rust based library.
-## so i currently skip this extra dep
-## %dnl %pyproject_extras_subpkg -n python3-%{pypi_name} cryptg
 
 %description -n python3-%{pypi_name}
 Telethon is an asyncio Python 3 MTProto library to interact with Telegram's API
 as a user or through a bot account (bot API alternative)
 
+%pyproject_extras_subpkg -n python3-%{pypi_name} cryptg
+
 %prep
-%autosetup -n %{pypi_name}-%{pypi_version}
+%autosetup -p1 -n %{pypi_name}-%{pypi_version}
 
 %generate_buildrequires
-## no cryptg currently
-##%dnl %pyproject_buildrequires -t -x cryptg
 ##%dnl %pyproject_buildrequires -t
 ## no tests currently. see https://github.com/tox-dev/tox/issues/3602
 ## Fedora now have 4.35, we require at least 4.39 to workaround error
 ## "setup.cfg due to section tox:tox not found"
-%pyproject_buildrequires
+%pyproject_buildrequires -x cryptg
 
 %build
 %pyproject_wheel

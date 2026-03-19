@@ -1,0 +1,21 @@
+diff -up cryptg-0.5.2/setup.py.ori cryptg-0.5.2/setup.py
+--- cryptg-0.5.2/setup.py.ori	2026-03-19 15:33:58.469150324 +0000
++++ cryptg-0.5.2/setup.py	2026-03-19 15:34:01.198171276 +0000
+@@ -4,7 +4,7 @@ import sys
+ import os
+ 
+ from setuptools import find_packages, setup
+-from setuptools_rust import RustExtension
++from setuptools_rust import RustExtension, Strip
+ 
+ PACKAGE_NAME = "cryptg"
+ PACKAGE_VERSION = "0.5.2"
+@@ -52,7 +52,7 @@ def main(args):
+ 
+         packages=find_packages(),
+         python_requires=">=3.7",
+-        rust_extensions=[RustExtension("cryptg.cryptg")],
++        rust_extensions=[RustExtension(target="cryptg.cryptg", strip=Strip.No)],
+         zip_safe=False,
+     )
+ 
