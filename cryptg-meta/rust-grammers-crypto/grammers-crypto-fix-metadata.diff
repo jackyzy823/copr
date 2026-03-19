@@ -1,0 +1,20 @@
+--- grammers-crypto-0.9.0/Cargo.toml	2006-07-24T01:21:28+00:00
++++ grammers-crypto-0.9.0/Cargo.toml	2026-03-19T14:35:31.909063+00:00
+@@ -39,10 +39,6 @@
+ name = "grammers_crypto"
+ path = "src/lib.rs"
+ 
+-[[test]]
+-name = "deps"
+-path = "tests/deps.rs"
+-
+ [[bench]]
+ name = "cipher"
+ path = "benches/cipher.rs"
+@@ -80,6 +76,3 @@
+ 
+ [dev-dependencies.bencher]
+ version = "0.1.5"
+-
+-[dev-dependencies.toml]
+-version = "1.0.3"
