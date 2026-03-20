@@ -1,0 +1,19 @@
+[package]
+cargo-toml-patch-comments = [
+    "drop unused compat support for futures 0.1",
+    "drop unused compat support for tokio 0.1",
+]
+
+[[package.extra-patches]]
+number = 10
+file = "0001-revert-removal-of-unstable-io_slice_advance-feature-.patch"
+comments = [
+    """\
+revert upstream change that broke compilation with Rust < 1.81:
+https://github.com/rust-lang/futures-rs/issues/2892""",
+]
+
+[tests]
+run = ["none"]
+comments = ["tests can only be run in-tree"]
+

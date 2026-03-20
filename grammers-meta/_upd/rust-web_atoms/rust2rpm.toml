@@ -1,0 +1,3 @@
+[package]
+doc-files.exclude = ["local_names.txt"]
+

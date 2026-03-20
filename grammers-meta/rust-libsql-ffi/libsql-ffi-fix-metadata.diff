@@ -1,0 +1,11 @@
+--- libsql-ffi-0.9.30/Cargo.toml	1970-01-01T00:00:01+00:00
++++ libsql-ffi-0.9.30/Cargo.toml	2026-03-20T13:46:54.259683+00:00
+@@ -68,7 +68,7 @@
+ optional = true
+ 
+ [build-dependencies.bindgen]
+-version = "0.66.1"
++version = "0.68.1"
+ 
+ [build-dependencies.cc]
+ version = "1.0"

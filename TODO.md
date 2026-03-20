@@ -3,8 +3,6 @@ Rust
     - trougnouf/cfait
         * winresouce could be removed, since it is used when building and CARGO_CFG_TARGET_OS==windows
         * uniffi is used for ANDROID / INTEROP
-    - [Lonami/grammers](https://codeberg.org/Lonami/grammers)
-        * grammers-crypto done
 
 Python
     - [bup](https://github.com/bup/bup)

@@ -1,0 +1,9 @@
+[package]
+summary = "URL library for Rust, based on the WHATWG URL Standard"
+cargo-toml-patch-comments = [
+    "drop unused, benchmark-only bencher dev-dependency",
+]
+
+[features]
+hide = ["debugger_visualizer"]
+

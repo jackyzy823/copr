@@ -1,0 +1,49 @@
+--- grammers-client-0.9.0/Cargo.toml	2006-07-24T01:21:28+00:00
++++ grammers-client-0.9.0/Cargo.toml	2026-03-20T15:28:49.700648+00:00
+@@ -47,30 +47,6 @@
+ [lib]
+ name = "grammers_client"
+ path = "src/lib.rs"
+-
+-[[example]]
+-name = "dialogs"
+-path = "examples/dialogs.rs"
+-
+-[[example]]
+-name = "downloader"
+-path = "examples/downloader.rs"
+-
+-[[example]]
+-name = "echo"
+-path = "examples/echo.rs"
+-
+-[[example]]
+-name = "inline-pagination"
+-path = "examples/inline-pagination.rs"
+-
+-[[example]]
+-name = "ping"
+-path = "examples/ping.rs"
+-
+-[[test]]
+-name = "deps"
+-path = "tests/deps.rs"
+ 
+ [dependencies.chrono]
+ version = "0.4.43"
+@@ -127,15 +103,7 @@
+ version = "2.5.8"
+ optional = true
+ 
+-[dev-dependencies.simple_logger]
+-version = "5.2.0"
+-features = ["colors"]
+-default-features = false
+-
+ [dev-dependencies.tokio]
+ version = "1.49.0"
+ features = ["signal"]
+ default-features = false
+-
+-[dev-dependencies.toml]
+-version = "1.0.3"

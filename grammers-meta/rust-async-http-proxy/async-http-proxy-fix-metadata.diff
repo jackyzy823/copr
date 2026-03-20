@@ -1,0 +1,10 @@
+--- async-http-proxy-1.2.5/Cargo.toml	1970-01-01T00:00:01+00:00
++++ async-http-proxy-1.2.5/Cargo.toml	2026-03-20T14:50:03.525001+00:00
+@@ -91,6 +91,6 @@
+ 
+ [features]
+ basic-auth = ["base64"]
+-default = []
++default = ["runtime-tokio"]
+ runtime-async-std = ["async-std"]
+ runtime-tokio = ["tokio"]

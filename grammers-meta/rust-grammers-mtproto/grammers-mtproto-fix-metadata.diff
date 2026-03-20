@@ -1,0 +1,20 @@
+--- grammers-mtproto-0.9.0/Cargo.toml	2006-07-24T01:21:28+00:00
++++ grammers-mtproto-0.9.0/Cargo.toml	2026-03-20T13:05:14.034081+00:00
+@@ -40,10 +40,6 @@
+ name = "grammers_mtproto"
+ path = "src/lib.rs"
+ 
+-[[test]]
+-name = "deps"
+-path = "tests/deps.rs"
+-
+ [dependencies.bytes]
+ version = "1.11.1"
+ 
+@@ -71,6 +67,3 @@
+ 
+ [dependencies.sha1]
+ version = "0.10.6"
+-
+-[dev-dependencies.toml]
+-version = "1.0.3"

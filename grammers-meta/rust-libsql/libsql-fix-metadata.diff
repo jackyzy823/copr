@@ -1,0 +1,102 @@
+--- libsql-0.9.30/Cargo.toml	1970-01-01T00:00:01+00:00
++++ libsql-0.9.30/Cargo.toml	2026-03-20T14:11:26.848454+00:00
+@@ -48,9 +48,6 @@
+ ]
+ default = [
+     "core",
+-    "replication",
+-    "remote",
+-    "sync",
+     "tls",
+ ]
+ encryption = [
+@@ -74,66 +71,10 @@
+     "dep:sqlite3-parser",
+     "dep:fallible-iterator",
+ ]
+-remote = [
+-    "hrana",
+-    "dep:base64",
+-    "dep:tower",
+-    "dep:hyper",
+-    "dep:hyper",
+-    "dep:http",
+-    "dep:tokio",
+-    "dep:futures",
+-    "dep:bitflags",
+-]
+-replication = [
+-    "core",
+-    "parser",
+-    "serde",
+-    "stream",
+-    "dep:tower",
+-    "dep:hyper",
+-    "dep:http",
+-    "dep:tokio",
+-    "dep:anyhow",
+-    "dep:bincode",
+-    "dep:zerocopy",
+-    "dep:bytes",
+-    "dep:uuid",
+-    "dep:tokio-stream",
+-    "dep:parking_lot",
+-    "dep:tokio",
+-    "dep:tonic",
+-    "dep:tonic-web",
+-    "dep:tower-http",
+-    "dep:futures",
+-    "dep:libsql_replication",
+-]
+ serde = ["dep:serde"]
+ stream = [
+     "dep:futures",
+     "dep:async-stream",
+-]
+-sync = [
+-    "core",
+-    "parser",
+-    "serde",
+-    "stream",
+-    "remote",
+-    "replication",
+-    "dep:base64",
+-    "dep:tower",
+-    "dep:hyper",
+-    "dep:http",
+-    "dep:tokio",
+-    "dep:zerocopy",
+-    "dep:bytes",
+-    "dep:tokio",
+-    "dep:futures",
+-    "dep:serde_json",
+-    "dep:crc32fast",
+-    "dep:chrono",
+-    "dep:uuid",
+-    "tokio/fs",
+ ]
+ tls = ["dep:hyper-rustls"]
+ wasm = ["hrana"]
+@@ -365,22 +306,6 @@
+ version = "0.7.28"
+ optional = true
+ 
+-[dev-dependencies.criterion]
+-version = "0.5"
+-features = [
+-    "html_reports",
+-    "async",
+-    "async_futures",
+-    "async_tokio",
+-]
+-
+-[dev-dependencies.pprof]
+-version = "0.14.0"
+-features = [
+-    "criterion",
+-    "flamegraph",
+-]
+-
+ [dev-dependencies.rand]
+ version = "0.8.5"
+ 

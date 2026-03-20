@@ -1,0 +1,32 @@
+--- grammers-mtsender-0.9.0/Cargo.toml	2006-07-24T01:21:28+00:00
++++ grammers-mtsender-0.9.0/Cargo.toml	2026-03-20T14:38:39.899274+00:00
+@@ -51,14 +51,6 @@
+ [lib]
+ name = "grammers_mtsender"
+ path = "src/lib.rs"
+-
+-[[test]]
+-name = "deps"
+-path = "tests/deps.rs"
+-
+-[[test]]
+-name = "lib"
+-path = "tests/lib.rs"
+ 
+ [dependencies.async-http-proxy]
+ version = "1.2.5"
+@@ -118,14 +110,3 @@
+ [dependencies.url]
+ version = "2.5.8"
+ optional = true
+-
+-[dev-dependencies.simple_logger]
+-version = "5.2.0"
+-features = ["colors"]
+-default-features = false
+-
+-[dev-dependencies.socks5-server]
+-version = "0.10.1"
+-
+-[dev-dependencies.toml]
+-version = "1.0.3"

@@ -1,0 +1,8 @@
+[tests]
+skip = [
+    "imp::file_release::tests",
+]
+comments = [
+    "skip tests that require fixtures that are not included in published crates",
+]
+

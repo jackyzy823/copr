@@ -1,0 +1,16 @@
+[package]
+cargo-toml-patch-comments = [
+    "drop outdated, example-only rand dev-dependency",
+    "drop unused support for the obsolete \"encoding\" crate",
+]
+
+[tests]
+skip = ["assert_sizes"]
+comments = ["skip test for exact size of a struct / enum that fails with Rust 1.64+: https://github.com/servo/tendril/issues/66"]
+
+[scripts]
+prep.post = [
+    "# drop unused example program that pulls in outdated dependencies",
+    "rm -rv examples/",
+]
+
