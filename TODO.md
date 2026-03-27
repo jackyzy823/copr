@@ -7,6 +7,11 @@ Rust
 Python
     - [bup](https://github.com/bup/bup)
         * Not in PyPI (don't confused with the PyPI one, it is another package)
+    - mitmproxy
+        * https://rathann.fedorapeople.org/review/mitmproxy/mitmproxy.spec
+        * https://bugzilla.redhat.com/show_bug.cgi?id=2109939
+        * https://build.opensuse.org/projects/openSUSE:Factory/packages/python-mitmproxy/files/python-mitmproxy.spec
+        * it requires https://github.com/mitmproxy/mitmproxy_rs, which is not in crates.io
 
 C++
     - KDE/kup
@@ -16,6 +21,6 @@ Java
     - JADX
         * GUI and CLI
         * take jd-core / java-jd-decompiler as reference (however it don't use gradle, just plain javac in spec)
-	* gradle problem
+        * gradle problem
         * dependencies problem
 
