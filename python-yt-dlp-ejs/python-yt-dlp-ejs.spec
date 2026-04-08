@@ -2,7 +2,8 @@
 %global         srcname yt_dlp_ejs
 %global         pypi_name %{gsub %{srcname} _ -}
 Name:           python-%{pypi_name}
-Version:        0.3.1
+# python -m build --sdist
+Version:        0.8.1.dev2+g2231f1fd6
 Release:        %autorelease
 Summary:        External JavaScript for yt-dlp supporting many runtimes
 
@@ -17,9 +18,6 @@ Source1:        https://registry.npmjs.org/meriyah/-/meriyah-6.1.4.tgz
 Source2:        https://registry.npmjs.org/astring/-/astring-1.9.0.tgz
 
 Source3:        tests.py
-
-## Make hatch build script to build js with esbuild
-Patch0:         hatch_with_esbuild.patch
 
 BuildArch:      noarch
 BuildRequires:  python3-devel
@@ -57,7 +55,8 @@ cp -p %{SOURCE3} .
 
 %build
 # TODO: future use
-# export EJS_BUILD_SKIP_INSTALL=1
+export EJS_BUILD_SKIP_INSTALL=true
+export EJS_BUILD_BUNDLER=esbuild
 %pyproject_wheel
 
 

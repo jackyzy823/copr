@@ -6,11 +6,18 @@ response = r'''{'type': 'result', 'responses': [{'type': 'result', 'data': {'ZdZ
 
 ## https://github.com/yt-dlp/yt-dlp/blob/7af6d81f35aea8832023daa30ada10e6673a0529/test/test_jsc/test_ejs_integration.py#L121
 ## need to pop "preprocessed" key from the jsc result of initial request.
+## Update: see https://github.com/yt-dlp/ejs/issues/42#issuecomment-4202454569
 print(f'''\
         {yt_dlp_ejs.yt.solver.lib()};
-        Object.assign(globalThis, lib);
+        function require(name) {{
+          const result = (lib?.lib ?? lib)[name];
+          if (!result) {{
+            throw `Missing library: ${{name}}`;
+          }}
+          return result;
+        }}
         {yt_dlp_ejs.yt.solver.core()};
-        var initial = jsc({request});
+        var initial = jsc.default({request});
         delete initial["preprocessed_player"];
         if(JSON.stringify({response}) != JSON.stringify(initial)) {{ throw(new Error("ejs returns wrong result")); }};
         ''')
