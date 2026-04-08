@@ -1,3 +1,8 @@
+0. Crate not been uploaded to crates.io
+crate can be created via `crate package`
+then rust2rpm -O pkgname@version
+-O requires crate already saved in ~/.cache/rust2rpm
+
 1. Use /usr/bin/cargo2rpm --path Cargo.toml buildrequires --with-check to generate build requires
 
 Use `cargo vendor` to save all dependes in `vendor` folder
