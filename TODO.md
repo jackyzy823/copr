@@ -7,6 +7,7 @@ Rust
         * Already done via https://discussion.fedoraproject.org/t/espanso-copr-available-for-testing/88921
         * https://copr.fedorainfracloud.org/coprs/eclipseo/espanso/
         * not in crates.io
+    - [amdgpu_top](https://github.com/Umio-Yasuno/amdgpu_top)
 
 Python
     - [bup](https://github.com/bup/bup)
