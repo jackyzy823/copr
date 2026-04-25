@@ -1,0 +1,32 @@
+From 3e1a5d72f8ce65bba8d9e1591688aa14edb4b9e4 Mon Sep 17 00:00:00 2001
+From: jackyzy823 <jackyzy823@gmail.com>
+Date: Fri, 24 Apr 2026 17:10:56 +0000
+Subject: [PATCH 3/7] fix(tests): pass TestClientAuthPublicKey
+
+Since https://github.com/zmap/zgrab2/pull/616, "ext-info-c" won't be
+sent if `CollectExtensions` is false.
+
+As a result, server wouldn't announce the support of rsa-sha2-256.
+
+Ref: https://github.com/golang/crypto/commit/6fad3dfc18918c2ac9c112e46b32473bd2e5e2f9#diff-5d70d3dfd7a5a1e978a852be04260c37b5aa12e44492bd54f470846f2278f07eR627-R634
+---
+ lib/ssh/client_auth_test.go | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/lib/ssh/client_auth_test.go b/lib/ssh/client_auth_test.go
+index e986926..8cb5d9f 100644
+--- a/lib/ssh/client_auth_test.go
++++ b/lib/ssh/client_auth_test.go
+@@ -128,6 +128,9 @@ func TestClientAuthPublicKey(t *testing.T) {
+ 			PublicKeys(signer),
+ 		},
+ 		HostKeyCallback: InsecureIgnoreHostKey(),
++		Config: Config{
++			CollectExtensions: true,
++		},
+ 	}
+ 	if err := tryAuth(t, config); err != nil {
+ 		t.Fatalf("unable to dial remote side: %s", err)
+-- 
+2.53.0
+

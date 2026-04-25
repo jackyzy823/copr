@@ -1,0 +1,30 @@
+From 98c60d12478e5ec51b5f74ffc5b1eb6685da0512 Mon Sep 17 00:00:00 2001
+From: jackyzy823 <jackyzy823@gmail.com>
+Date: Sat, 25 Apr 2026 16:27:34 +0000
+Subject: [PATCH 7/7] fix(tests): enable all tests in Makefile
+
+---
+ Makefile | 6 +-----
+ 1 file changed, 1 insertion(+), 5 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index c3c4843..7dfcba9 100644
+--- a/Makefile
++++ b/Makefile
+@@ -12,12 +12,8 @@ all: zgrab2
+ 
+ .PHONY: all clean integration-test integration-test-clean integration-test-run integration-test-build gofmt test install uninstall
+ 
+-# Test currently only runs on the modules folder because some of the 
+-# third-party libraries in lib (e.g. http) are failing.
+ test:
+-	go test -v -failfast .
+-	cd lib/output/test && go test -v -failfast ./...
+-	cd modules && go test -v -failfast ./...
++	go test -v -failfast ./...
+ 
+ lint:
+ 	gofmt -s -w $(shell find . -type f -name '*.go'| grep -v "/.template/")
+-- 
+2.53.0
+

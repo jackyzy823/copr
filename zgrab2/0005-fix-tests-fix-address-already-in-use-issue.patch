@@ -1,0 +1,30 @@
+From 3de20e4495c4bc096e59be52803d973f2e91c83d Mon Sep 17 00:00:00 2001
+From: jackyzy823 <jackyzy823@gmail.com>
+Date: Sat, 25 Apr 2026 07:35:52 +0000
+Subject: [PATCH 5/7] fix(tests): fix address already in use issue
+
+---
+ conn_bytelimit_test.go | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/conn_bytelimit_test.go b/conn_bytelimit_test.go
+index 89b0c57..5efd10d 100644
+--- a/conn_bytelimit_test.go
++++ b/conn_bytelimit_test.go
+@@ -386,11 +386,12 @@ func testBytesReadLimitOn(t *testing.T, connector timeoutConnector) error {
+ 			return err
+ 		}
+ 	}
+-	for i := 0; i < 10; i++ {
++	for i := 10; i < 20; i++ {
+ 		if err := runBytesReadLimitTrial(t, connector, i, readLimitTestConfig.runMultiSend); err != nil {
+ 			return err
+ 		}
+ 	}
++	time.Sleep(1 * time.Second)
+ 	return nil
+ }
+ 
+-- 
+2.53.0
+

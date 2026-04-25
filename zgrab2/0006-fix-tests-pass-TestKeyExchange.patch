@@ -1,0 +1,31 @@
+From 75e07dde7d5e111699fcbc9b96b20b643317df40 Mon Sep 17 00:00:00 2001
+From: jackyzy823 <jackyzy823@gmail.com>
+Date: Sat, 25 Apr 2026 16:18:44 +0000
+Subject: [PATCH 6/7] fix(tests): pass TestKeyExchange
+
+if `Gex*Bits` not set, client will send `0`s in these fields to server
+when key exchanging. This will cause ssh server quitting with fatal
+error `DH GEX group out of range` when client using
+`diffie-hellman-group-exchange-sha256`. The test will hang until timeout
+due to the defunct server process.
+---
+ lib/ssh/test/session_test.go | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/lib/ssh/test/session_test.go b/lib/ssh/test/session_test.go
+index 8db38c3..88c8777 100644
+--- a/lib/ssh/test/session_test.go
++++ b/lib/ssh/test/session_test.go
+@@ -411,6 +411,9 @@ func TestKeyExchanges(t *testing.T) {
+ 			conf := clientConfig()
+ 			// Don't fail if sshd doesn't have the kex.
+ 			conf.KeyExchanges = append([]string{kex}, kexOrder...)
++			conf.GexMinBits = 1024
++			conf.GexMaxBits = 8192
++			conf.GexPreferredBits = 2048
+ 			conn, err := server.TryDial(conf)
+ 			if err == nil {
+ 				conn.Close()
+-- 
+2.53.0
+

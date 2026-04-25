@@ -1,0 +1,27 @@
+From ee0d43e846e6fb652084dab975ace7b8b9afc63f Mon Sep 17 00:00:00 2001
+From: jackyzy823 <jackyzy823@gmail.com>
+Date: Fri, 24 Apr 2026 17:06:32 +0000
+Subject: [PATCH 2/7] fix(tests): pass TestValidateCert
+
+crypto/rsa: 768-bit keys are insecure (see https://go.dev/pkg/crypto/rsa#hdr-Minimum_key_size)
+
+Or we should replace `exampleSSHCert`, just like https://github.com/golang/go/issues/71612
+---
+ lib/ssh/certs_test.go | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/lib/ssh/certs_test.go b/lib/ssh/certs_test.go
+index d1cdeea..246e23f 100644
+--- a/lib/ssh/certs_test.go
++++ b/lib/ssh/certs_test.go
+@@ -2,6 +2,7 @@
+ // Use of this source code is governed by a BSD-style
+ // license that can be found in the LICENSE file.
+ 
++//go:debug rsa1024min=0
+ package ssh
+ 
+ import (
+-- 
+2.53.0
+
