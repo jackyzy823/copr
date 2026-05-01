@@ -1,0 +1,13 @@
+skip these tests which requires additional files.
+    compare_snapshot
+    example_linux
+    example_linux_fallback
+    fat_arch_1
+    fat_arch_2
+    linux_nonzero_base_address
+    successful_dll
+    successful_pdb
+    successful_pdb2
+    successful_pdb_unspecified_id
+    unspecified_id_fat_arch
+    unsuccessful_pdb_wrong_id

@@ -1,0 +1,17 @@
+ Problem 2: conflicting requests
+  - nothing provides (crate(wholesym/default) >= 0.8.0 with crate(wholesym/default) < 0.9.0~) needed by rust-minidump-unwind+wholesym-devel-0.26.1-1.fc45.noarch from @commandline
+ Problem 3: conflicting requests
+  - nothing provides (crate(framehop/default) >= 0.15.0 with crate(framehop/default) < 0.16.0~) needed by rust-minidump-unwind+framehop-devel-0.26.1-1.fc45.noarch from @commandline
+ Problem 4: package rust-minidump-unwind+debuginfo-unwind-devel-0.26.1-1.fc45.noarch from @commandline requires crate(minidump-unwind/framehop) = 0.26.1, but none of the providers can be installed
+  - conflicting requests
+  - nothing provides (crate(framehop/default) >= 0.15.0 with crate(framehop/default) < 0.16.0~) needed by rust-minidump-unwind+framehop-devel-0.26.1-1.fc45.noarch from @commandline
+ Problem 5: package rust-minidump-unwind+debuginfo-symbols-devel-0.26.1-1.fc45.noarch from @commandline requires crate(minidump-unwind/wholesym) = 0.26.1, but none of the providers can be installed
+  - conflicting requests
+  - nothing provides (crate(wholesym/default) >= 0.8.0 with crate(wholesym/default) < 0.9.0~) needed by rust-minidump-unwind+wholesym-devel-0.26.1-1.fc45.noarch from @commandline
+ Problem 6: package rust-minidump-unwind+debuginfo-devel-0.26.1-1.fc45.noarch from @commandline requires crate(minidump-unwind/debuginfo-symbols) = 0.26.1, but none of the providers can be installed
+  - package rust-minidump-unwind+debuginfo-symbols-devel-0.26.1-1.fc45.noarch from @commandline requires crate(minidump-unwind/wholesym) = 0.26.1, but none of the providers can be installed
+  - conflicting requests
+  - nothing provides (crate(wholesym/default) >= 0.8.0 with crate(wholesym/default) < 0.9.0~) needed by rust-minidump-unwind+wholesym-devel-0.26.1-1.fc45.noarch from @commandline
+You can try to add to command line:
+  --skip-broken to skip uninstallable packages
+

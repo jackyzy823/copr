@@ -1,0 +1,2 @@
+1. missing minidump-synth in Cargo.toml
+2. missing test file --skip processor::process_minidump --skip test_processor_symbols --skip test_processor 

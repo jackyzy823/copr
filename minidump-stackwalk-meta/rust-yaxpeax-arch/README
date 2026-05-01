@@ -1,0 +1,1 @@
+instruction_text_sink_write_char_rejects_not_ascii ->  see display_sink.rs:437 , only panic when debug build

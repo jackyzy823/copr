@@ -1,0 +1,32 @@
+--- minidump-0.26.1/Cargo.toml	1970-01-01T00:00:01+00:00
++++ minidump-0.26.1/Cargo.toml	2026-04-30T15:11:52.296282+00:00
+@@ -43,10 +43,6 @@
+ name = "minidump"
+ path = "src/lib.rs"
+ 
+-[[test]]
+-name = "test_minidump"
+-path = "tests/test_minidump.rs"
+-
+ [dependencies.arbitrary]
+ version = "1"
+ features = ["derive"]
+@@ -62,6 +58,9 @@
+ version = "0.9"
+ 
+ [dependencies.minidump-common]
++version = "0.26.1"
++
++[dependencies.minidump-synth]
+ version = "0.26.1"
+ 
+ [dependencies.num-traits]
+@@ -95,7 +94,7 @@
+ version = "1.0.0"
+ 
+ [dev-dependencies.ctor]
+-version = "0.4"
++version = "0.6"
+ 
+ [dev-dependencies.doc-comment]
+ version = "0.3.3"

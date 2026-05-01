@@ -1,0 +1,4 @@
+1. tests
+tests requires test data file
+so drop tests
+2. missing dep minidump_synth in Cargo.toml

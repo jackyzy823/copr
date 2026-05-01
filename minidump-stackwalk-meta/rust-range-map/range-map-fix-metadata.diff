@@ -1,0 +1,8 @@
+--- range-map-0.2.0/Cargo.toml	1970-01-01T00:00:01+00:00
++++ range-map-0.2.0/Cargo.toml	2026-04-30T14:58:08.224089+00:00
+@@ -26,4 +26,4 @@
+ version = "0.1"
+ 
+ [dev-dependencies.quickcheck]
+-version = "0.8"
++version = "0.9"

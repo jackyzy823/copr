@@ -1,0 +1,12 @@
+--- minidump-processor-0.26.1/Cargo.toml	1970-01-01T00:00:01+00:00
++++ minidump-processor-0.26.1/Cargo.toml	2026-05-01T08:49:37.417616+00:00
+@@ -66,6 +66,9 @@
+ [dependencies.minidump-unwind]
+ version = "0.26.1"
+ 
++[dependencies.minidump-synth]
++version = "0.26.1"
++
+ [dependencies.scroll]
+ version = "0.12.0"
+ 

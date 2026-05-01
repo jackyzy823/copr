@@ -1,0 +1,10 @@
+skip these tests which requires additional files
+    android32_v5_local
+    asm_with_continue
+    asm_x86_64
+    stripped_macos
+    win64_ci_v5_snapshot
+    win64_local_v5_snapshot_1
+    win_exe
+
+
