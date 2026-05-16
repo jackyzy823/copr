@@ -1,17 +1,15 @@
-# disable lto , due to ld error for not finding embedded binary resources
-# after test, with NO_INCBIN , lto could pass
-# either
-%dnl %define _lto_cflags %{nil}
-# or use upstream patch 29e0d376dc9e85cd098e1f8ae0a32f012127a98
+%global commit 00987b9e0063f810882afc008f5129b996a9ce62
+%global shortcommit %{sub %{commit} 1 7}
+
 Name:           lwan
-Version:        0.7
+Version:        0.7^20260516git%{shortcommit}
 Release:        %autorelease
 Summary:        Experimental, scalable, high performance HTTP server
 
 License:        GPL-2.0-or-later
 URL:            https://lwan.ws
 
-Source0:        https://github.com/lpereira/%{name}/archive/v%{version}/%{name}-v%{version}.tar.gz
+Source0:        https://github.com/lpereira/%{name}/archive/%{commit}/%{name}-%{shortcommit}.tar.gz
 
 BuildRequires:  cmake
 BuildRequires:  pkgconfig(zlib)
@@ -26,9 +24,6 @@ BuildRequires:  gcc
 # sqlite is a dependency for techenmpower benchmark suite
 # BuildRequires:  pkgconfig(sqlite3)
 
-# fix bin2hex ld issue
-Patch0:         https://github.com/lpereira/lwan/commit/29e0d376dc9e85cd098e1f8ae0a32f012127a98
-
 %description
 %{summary}.
 
@@ -39,7 +34,7 @@ Summary: Development files for lib%{name}
 %{summary}.
 
 %prep
-%autosetup -p1
+%autosetup -n %{name}-%{commit}
 
 %conf
 # -DALTERNATIVE_MALLOC=
