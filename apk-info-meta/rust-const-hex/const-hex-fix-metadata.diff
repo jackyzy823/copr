@@ -1,0 +1,41 @@
+--- const-hex-1.19.0/Cargo.toml	2006-07-24T01:21:28+00:00
++++ const-hex-1.19.0/Cargo.toml	2026-05-17T03:59:56.900013+00:00
+@@ -89,38 +89,6 @@
+ optional = true
+ default-features = false
+ 
+-[dev-dependencies.divan]
+-version = "3"
+-package = "codspeed-divan-compat"
+-
+-[dev-dependencies.faster-hex]
+-version = "0.10.0"
+-features = ["alloc"]
+-default-features = false
+-
+-[dev-dependencies.hex]
+-version = "~0.4.2"
+-features = ["alloc"]
+-default-features = false
+-
+-[dev-dependencies.hex-simd]
+-version = "0.8"
+-features = ["alloc"]
+-default-features = false
+-
+-[dev-dependencies.rustc-hex]
+-version = "2.1"
+-
+-[dev-dependencies.serde]
+-version = "1.0"
+-features = ["derive"]
+-default-features = false
+-
+-[dev-dependencies.serde_json]
+-version = "1.0"
+-features = ["alloc"]
+-default-features = false
+-
+ [target.'cfg(any(target_arch = "x86", target_arch = "x86_64"))'.dependencies.cpufeatures]
+ version = "0.2"
+ 

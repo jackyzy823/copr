@@ -1,0 +1,10 @@
+--- apk-info-zip-1.0.11/Cargo.toml	2006-07-24T01:21:28+00:00
++++ apk-info-zip-1.0.11/Cargo.toml	2026-05-16T16:31:49.294406+00:00
+@@ -56,7 +56,6 @@
+ 
+ [dependencies.openssl]
+ version = "0.10.75"
+-features = ["vendored"]
+ 
+ [dependencies.serde]
+ version = "1.0.228"

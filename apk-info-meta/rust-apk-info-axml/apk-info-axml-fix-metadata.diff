@@ -1,0 +1,19 @@
+--- apk-info-axml-1.0.11/Cargo.toml	2006-07-24T01:21:28+00:00
++++ apk-info-axml-1.0.11/Cargo.toml	2026-05-17T03:51:02.877306+00:00
+@@ -46,16 +46,6 @@
+ [lib]
+ name = "apk_info_axml"
+ path = "src/lib.rs"
+-
+-[[bin]]
+-name = "attrs-converter"
+-path = "src/converters/attrs-converter.rs"
+-required-features = ["converter"]
+-
+-[[bin]]
+-name = "xml-converter"
+-path = "src/converters/xml-converter.rs"
+-required-features = ["converter"]
+ 
+ [dependencies.apk-info-xml]
+ version = "1.0.11"
