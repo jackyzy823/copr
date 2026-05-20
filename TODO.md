@@ -17,6 +17,16 @@ Python
         * https://bugzilla.redhat.com/show_bug.cgi?id=2109939
         * https://build.opensuse.org/projects/openSUSE:Factory/packages/python-mitmproxy/files/python-mitmproxy.spec
         * it requires https://github.com/mitmproxy/mitmproxy_rs, which is not in crates.io
+        * it is basically unpackagable.
+        * python-mitmproxy depends on python-mitmproxy_rs
+        * python-mitmrpoxy_rs python part requries python-mitmprox_linux
+        * python-mitmproxy_rs rust part requires rust-mitmproxy and rust-mitmproxy-highlight and rust-contentviews
+        * python-mitmproxy_linux rust part requires rust-mitmproxy and rust-mitmproxy-linux-ebpf-common
+        * python-mitmproxy_linux rust buildscript requires rust-mitmproxy-linux-ebpf
+        * rust-mitmproxy-linux-ebpf requires special toolchain, and target, see mitmproxy-linux-ebpf/.cargo/config.toml
+        * rust-mitmproxy-linux-ebpf rust buildscript requires bpf-linker binary
+        * bpf-linker requires special LLVM version and build method, see bpf-linker/BUILDING.md
+        * Fedora eBPF packaging docs: https://fosdem.org/2026/schedule/event/VSXPA8-packaging-ebpf-in-linux-distros/:wq
 
 C/C++
     - KDE/kup
