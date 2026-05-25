@@ -5,7 +5,7 @@
 %global crate rmux-server
 
 Name:           rust-rmux-server
-Version:        0.3.0
+Version:        0.3.1
 Release:        %autorelease
 Summary:        Tokio daemon and request dispatcher for the RMUX terminal multiplexer
 
@@ -20,6 +20,9 @@ Source2:        https://raw.githubusercontent.com/Helvesec/rmux/refs/tags/v%{ver
 Source3:        https://raw.githubusercontent.com/Helvesec/rmux/refs/tags/v%{version}/LICENSE-MIT
 
 BuildRequires:  cargo-rpm-macros >= 24
+%if %{with check}
+BuildRequires:  ncurses
+%endif
 
 %global _description %{expand:
 Tokio daemon and request dispatcher for the RMUX terminal multiplexer.}

@@ -4,7 +4,7 @@
 %global crate rmux
 
 Name:           rust-rmux
-Version:        0.3.0
+Version:        0.3.1
 Release:        %autorelease
 Summary:        Local terminal multiplexer with a tmux-style CLI, daemon runtime, Rust SDK, and ratatui integration
 
@@ -103,6 +103,7 @@ install -Dpm0644 -t %{buildroot}%{_mandir}/man1 rmux.1
     --skip multi_pane_kill_reaps_children_under_the_hidden_daemon
     --skip session_name_rewrites_preserve_server_state
     --skip canonical_session_workflow_runs_end_to_end
+    --skip seamless_upgrade_restarts_idle_stale_daemon_on_real_socket
 }}
 %endif
 

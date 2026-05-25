@@ -5,7 +5,7 @@
 %global crate rmux-client
 
 Name:           rust-rmux-client
-Version:        0.3.0
+Version:        0.3.1
 Release:        %autorelease
 Summary:        Blocking local client and attach-mode plumbing for the RMUX terminal multiplexer
 

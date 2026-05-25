@@ -5,7 +5,7 @@
 %global crate rmux-types
 
 Name:           rust-rmux-types
-Version:        0.3.0
+Version:        0.3.1
 Release:        %autorelease
 Summary:        Shared platform-neutral value types for the RMUX terminal multiplexer workspace
 

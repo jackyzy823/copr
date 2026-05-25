@@ -5,7 +5,7 @@
 %global crate rmux-core
 
 Name:           rust-rmux-core
-Version:        0.3.0
+Version:        0.3.1
 Release:        %autorelease
 Summary:        Core session, pane, layout, format, hook, and buffer model for the RMUX terminal multiplexer
 

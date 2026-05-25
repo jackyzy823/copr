@@ -5,7 +5,7 @@
 %global crate rmux-os
 
 Name:           rust-rmux-os
-Version:        0.3.0
+Version:        0.3.1
 Release:        %autorelease
 Summary:        Small OS abstraction layer used by RMUX IPC and terminal integrations
 

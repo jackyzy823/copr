@@ -31,6 +31,11 @@ cp -p %{SOURCE3} ."""]
 #  "cp -p LICENSE-APACHE %{buildroot}%{crate_instdir}/",
 #  "cp -p LICENSE-MIT %{buildroot}%{crate_instdir}/",
 #]
+[requires]
+# otherwise handler::attach_tests::lifecycle::attached_remain_on_exit_strips_the_submitted_exit_line_from_dead_pane_capture will failed
+# thread 'handler::attach_tests::lifecycle::attached_remain_on_exit_strips_the_submitted_exit_line_from_dead_pane_capture' (3449) panicked at src/handler_attach_tests/lifecycle.rs:36:9:
+# attached remain-on-exit capture did not settle, got "export PS1='PROMPT> '\nclear\n[mockbuild@27f97cf5c352478eac58fe63f59d5908 rmux-server-0.3.1]$ export PS1='PROM\nPT> '\nPROMPT> clear\n-bash: clear: command not found\nPROMPT> exit\nlogout\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nPane is dead (status 127, Mon May 25 14:54:38 2026)\n"
+test = ["ncurses"]
 
 [tests]
 skip = ["request_command_surface_matches_handler_dispatch"]

@@ -5,7 +5,7 @@
 %global crate rmux-proto
 
 Name:           rust-rmux-proto
-Version:        0.3.0
+Version:        0.3.1
 Release:        %autorelease
 Summary:        RMUX detached IPC protocol DTOs, framing, and wire-safe error types
 
@@ -50,8 +50,8 @@ use the "default" feature of the "%{crate}" crate.
 
 %prep
 %autosetup -n %{crate}-%{version} -p1
-# Drop tests that require files which are not included in published crates
-tomcli-set Cargo.toml arrays delitem  test 'wire_compat' --key name
+# Drop tests that require files which are not included in published crates to build
+tomcli-set Cargo.toml arrays delitem test --key name 'wire_compat'
 %cargo_prep
 
 %generate_buildrequires
@@ -65,7 +65,8 @@ tomcli-set Cargo.toml arrays delitem  test 'wire_compat' --key name
 
 %if %{with check}
 %check
-# * skip tests that require files which are not included in published crates
+# * skip tests that require files which are not included in published crates to
+#   run
 %{cargo_test -- -- --exact %{shrink:
     --skip every_ledger_some_fixture_has_corresponding_file_on_disk
     --skip every_v1_fixture_file_on_disk_has_a_ledger_entry

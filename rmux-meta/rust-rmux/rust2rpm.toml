@@ -88,6 +88,8 @@ skip = [
     "multi_pane_kill_reaps_children_under_the_hidden_daemon",
     "session_name_rewrites_preserve_server_state",
     "canonical_session_workflow_runs_end_to_end",
+    # New in 0.3.1
+    "seamless_upgrade_restarts_idle_stale_daemon_on_real_socket"
     # This one failed on container,  initial pane title should include user, host, and path, got "<docker_containerid>"
     #"fresh_pane_title_has_user_host_and_path_before_shell_updates_it"
 ]

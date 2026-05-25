@@ -5,7 +5,7 @@
 %global crate rmux-ipc
 
 Name:           rust-rmux-ipc
-Version:        0.3.0
+Version:        0.3.1
 Release:        %autorelease
 Summary:        Local IPC endpoint and transport primitives for the RMUX terminal multiplexer
 

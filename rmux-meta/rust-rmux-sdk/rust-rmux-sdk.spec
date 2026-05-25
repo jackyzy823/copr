@@ -5,7 +5,7 @@
 %global crate rmux-sdk
 
 Name:           rust-rmux-sdk
-Version:        0.3.0
+Version:        0.3.1
 Release:        %autorelease
 Summary:        Public, daemon-backed Rust SDK for the RMUX terminal multiplexer
 

@@ -5,7 +5,7 @@
 %global crate ratatui-rmux
 
 Name:           rust-ratatui-rmux
-Version:        0.3.0
+Version:        0.3.1
 Release:        %autorelease
 Summary:        Ratatui integration crate for the RMUX terminal multiplexer that paints daemon-backed pane state into a ratatui Buffer
 
