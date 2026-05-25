@@ -8,6 +8,7 @@ Rust
         * https://copr.fedorainfracloud.org/coprs/eclipseo/espanso/
         * not in crates.io
     - [amdgpu_top](https://github.com/Umio-Yasuno/amdgpu_top)
+    - [sandlock](https://github.com/multikernel/sandlock)
 
 Python
     - [bup](https://github.com/bup/bup)
@@ -40,6 +41,8 @@ C/C++
         * Already in openSUSE
     - [Angie](https://github.com/webserver-llc/angie)
         * nginx fork
+    - [TuxManager](https://github.com/benapetr/TuxManager)
+        * has own rpm build spec, see packaging/package-rpm.sh
 
 Java
     - JADX
