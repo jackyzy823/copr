@@ -1,6 +1,42 @@
+rmux-server
+	rmux-core
+		rmux-proto
+			rmux-types
+	rmux-ipc
+		rmux-os
+			rmux-types
+	rmux-os
+		rmux-types
+	rmux-pty
+		rmux-types
+rmux-sdk
+	rmux-ipc
+	rmux-os
+	rmux-proto
 
-rmux-types --> rmux-proto --> rmux
-rmux-ipc -> rmux-server
+rmux-client
+	rmux-core
+	rmux-ipc
+	rmux-os
+	rmux-proto
+	
+	rmux-sdk
+	rmux-server
+
+rmux
+	rmux-client
+	rmux-server
+	rmux-core
+	rmux-os
+	rmux-proto
+	
+	rmux-pty
+	rmux-sdk
+
+
+
+
+
 
 rmux:
         (crate(rmux-client/default) >= 0.3.0 with crate(rmux-client/default) < 0.4.0~) is needed by rust-rmux-0.3.0-1.fc45.x86_64
