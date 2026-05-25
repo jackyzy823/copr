@@ -1,0 +1,12 @@
+[tests]
+skip = [
+    "enforcement_script_exists",
+    "manifest_direct_dependencies_within_budget",
+    "ratatui_real_daemon_render_smoke"
+]
+skip-exact = true
+comments = [
+    "skip one test that require files which are not included in published crates",
+    "skip one test that requires original Cargo.toml",
+    "skip one test that requires CARGO_BIN_EXE_rmux env set to the built `rmux` binary path"
+]

@@ -1,0 +1,28 @@
+--- rmux-client-0.3.0/Cargo.toml	2006-07-24T01:21:28+00:00
++++ rmux-client-0.3.0/Cargo.toml	2026-05-25T05:46:57.087982+00:00
+@@ -110,25 +110,3 @@
+     "time",
+ ]
+ 
+-[target."cfg(windows)".dependencies.rmux-sdk]
+-version = "0.3.0"
+-
+-[target."cfg(windows)".dependencies.tokio]
+-version = "1.48.0"
+-features = [
+-    "io-util",
+-    "macros",
+-    "rt",
+-    "sync",
+-    "time",
+-]
+-
+-[target."cfg(windows)".dependencies.windows-sys]
+-version = "0.61.2"
+-features = [
+-    "Win32_Foundation",
+-    "Win32_Storage_FileSystem",
+-    "Win32_System_Console",
+-    "Win32_System_Pipes",
+-    "Win32_System_Threading",
+-]

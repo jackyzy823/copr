@@ -1,0 +1,27 @@
+[package]
+license-files = [
+  "LICENSE-APACHE",
+  "LICENSE-MIT",
+]
+
+[[package.extra-sources]]
+number = 2
+file = "https://raw.githubusercontent.com/Helvesec/rmux/refs/tags/v%{version}/LICENSE-APACHE"
+comments = [
+  "include license file",
+  "TODO https://github.com/Helvesec/rmux/pull/XX",
+]
+
+[[package.extra-sources]]
+number = 3
+file = "https://raw.githubusercontent.com/Helvesec/rmux/refs/tags/v%{version}/LICENSE-MIT"
+comments = [
+  "include license file",
+  "TODO https://github.com/Helvesec/rmux/pull/XX",
+]
+
+[scripts]
+prep.post = ["""\
+# copy in license file
+cp -p %{SOURCE2} .
+cp -p %{SOURCE3} ."""]

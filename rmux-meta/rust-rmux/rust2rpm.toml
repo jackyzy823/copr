@@ -1,0 +1,95 @@
+[package]
+extra-files = [
+    "%{_mandir}/man1/rmux.1*"
+]
+doc-files.include = ["human-friendly-config.md", "human-friendly.conf"]
+
+
+[[package.extra-sources]]
+number = 2
+file = "https://raw.githubusercontent.com/Helvesec/rmux/refs/tags/v%{version}/docs/human-friendly-config.md"
+comments = [
+  "include document files for config",
+]
+
+[[package.extra-sources]]
+number = 3
+file = "https://raw.githubusercontent.com/Helvesec/rmux/refs/tags/v%{version}/docs/examples/human-friendly.conf"
+comments = [
+  "include document files for config",
+]
+
+[requires]
+build = ["tomcli"]
+# for test `rmux_manpage_renders_with_system_formatter`
+test = ["man"]
+
+[scripts]
+prep.pre = [
+    "# Remove build dependencies and script for windows",
+    "tomcli-set Cargo.toml del package.build",
+    "tomcli-set Cargo.toml del build-dependencies.embed-manifest",
+    "rm build.rs",
+    "# Ease clap version restriction",
+    "tomcli-set Cargo.toml str dependencies.clap.version `tomcli-get Cargo.toml dependencies.clap.version | tr  -d =`",
+    "# Restrict rmux-* dependencies version to exact match",
+    "tomcli-set Cargo.toml str dependencies.rmux-client.version =`tomcli-get Cargo.toml dependencies.rmux-client.version`",
+    "tomcli-set Cargo.toml str dependencies.rmux-core.version =`tomcli-get Cargo.toml dependencies.rmux-core.version`",
+    "tomcli-set Cargo.toml str dependencies.rmux-os.version =`tomcli-get Cargo.toml dependencies.rmux-os.version`",
+    "tomcli-set Cargo.toml str dependencies.rmux-proto.version =`tomcli-get Cargo.toml dependencies.rmux-proto.version`",
+    "tomcli-set Cargo.toml str dependencies.rmux-server.version =`tomcli-get Cargo.toml dependencies.rmux-server.version`",
+    "tomcli-set Cargo.toml str dev-dependencies.rmux-core.version =`tomcli-get Cargo.toml dev-dependencies.rmux-core.version`",
+    "tomcli-set Cargo.toml str dev-dependencies.rmux-proto.version =`tomcli-get Cargo.toml dev-dependencies.rmux-proto.version`",
+    "tomcli-set Cargo.toml str dev-dependencies.rmux-pty.version =`tomcli-get Cargo.toml dev-dependencies.rmux-pty.version`",
+    "tomcli-set Cargo.toml str dev-dependencies.rmux-sdk.version =`tomcli-get Cargo.toml dev-dependencies.rmux-sdk.version`",
+]
+
+prep.post = ["""\
+# copy in document files
+cp -p %{SOURCE2} .
+cp -p %{SOURCE3} ."""]
+
+install.post = [
+    "install -Dpm0644 -t %{buildroot}%{_mandir}/man1 rmux.1"
+]
+
+[tests]
+# # because these tests require debug_assertions to call rmux-launcher.sh. see rmux-client/src/auto_start.rs
+# # so most tests which depend on BINARY_OVERRIDE_ENV will failed
+# ```
+# fn rmux_binary_path() -> io::Result<PathBuf> {
+#     let current_exe = env::current_exe()?;
+#     match env::var_os(BINARY_OVERRIDE_ENV).filter(|_| binary_override_enabled_for_tests()) {
+#         Some(path) => Ok(PathBuf::from(path)),
+#         None => Ok(current_exe),
+#     }
+# }
+#
+# fn binary_override_enabled_for_tests() -> bool {
+#     cfg!(debug_assertions)
+#         && env::var_os(BINARY_OVERRIDE_TEST_OPT_IN_ENV).is_some_and(|value| value == "1")
+# }
+# ```
+
+# From https://doc.rust-lang.org/reference/conditional-compilation.html#debug_assertions
+# Enabled by default when compiling without optimizations. This can be used to enable extra debugging code in development but not in production. For example, it controls the behavior of the standard library’s debug_assert! macro.
+# and we have opt-level = 3 in .cargo/config.toml
+# https://doc.rust-lang.org/cargo/reference/profiles.html#opt-level
+
+# maybe you need %rustflags_opt_level 0 ?
+skip = [
+    "rapid_create_kill_churn_reaps_children_without_socket_leaks",
+    "attach_session_is_a_start_server_command",
+    "command_free_invocation_auto_starts_default_new_session",
+    "sanitized_session_names_allow_new_session_auto_start",
+    "shell_command_starts_the_server_and_returns_the_shell_exit_status",
+    "start_server_is_a_start_server_command",
+    "ensure_server_running_reexecs_the_hidden_rmux_daemon",
+    "multi_pane_kill_reaps_children_under_the_hidden_daemon",
+    "session_name_rewrites_preserve_server_state",
+    "canonical_session_workflow_runs_end_to_end",
+    # This one failed on container,  initial pane title should include user, host, and path, got "<docker_containerid>"
+    #"fresh_pane_title_has_user_host_and_path_before_shell_updates_it"
+]
+skip-exact = true
+comments = ["skip tests that require debug_assertions to use BINARY_OVERRIDE_ENV to call rmux-launcher.sh for test"]

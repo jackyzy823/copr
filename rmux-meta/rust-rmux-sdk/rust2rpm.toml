@@ -1,0 +1,38 @@
+[requires]
+build = ["tomcli"]
+
+[scripts]
+prep.pre = [
+    "# Drop tests that require CARGO_BIN_EXE_rmux env set to the built `rmux` binary path",
+    "# otherwise it will try to build one, and will definitely failed due to no workspace/Cargo.toml",
+    "tomcli-set Cargo.toml arrays delitem test --key name 'layout_builder'",
+    "tomcli-set Cargo.toml arrays delitem test --key name 'lifecycle'",
+    "tomcli-set Cargo.toml arrays delitem test --key name 'pane_input'",
+    "tomcli-set Cargo.toml arrays delitem test --key name 'pane_queries'",
+    "tomcli-set Cargo.toml arrays delitem test --key name 'pane_set'",
+    "tomcli-set Cargo.toml arrays delitem test --key name 'session'",
+    "tomcli-set Cargo.toml arrays delitem test --key name 'smoke_v1'",
+    "tomcli-set Cargo.toml arrays delitem test --key name 'smoke_v1_full'",
+    "tomcli-set Cargo.toml arrays delitem test --key name 'terminal_automation'",
+    "tomcli-set Cargo.toml arrays delitem test --key name 'window'",
+    "# Drop feature which is used for windows",
+    "tomcli-set Cargo.toml arrays delitem dev-dependencies.crossterm.features 'windows'",
+    "tomcli-set Cargo.toml arrays delitem dependencies.crossterm.features 'windows'",
+    "# cargo2rpm bug, see https://codeberg.org/rust2rpm/cargo2rpm/issues/26",
+    "tomcli-set Cargo.toml append 'target.\"cfg(unix)\".dependencies.tokio.features' `tomcli-get -F newline-list Cargo.toml dependencies.tokio.features`"
+]
+
+[tests]
+skip = [
+    "live_wait_for_next_ignores_history_and_matches_split_future_output",
+    "wait_for_text_observes_rendered_daemon_output",
+    "rmux_sdk_cargo_manifest_does_not_depend_on_internal_crates",
+    "rmux_sdk_cargo_manifest_does_not_redeclare_proto_in_dev_dependencies",
+    "rmux_sdk_tokio_dependency_stays_narrow_async_io_plumbing"
+]
+skip-exact = true
+# Dependencies in Cargo.toml in crate is shown as [dependencies.xxx] version =
+# however tests in identity.rs requires [dependencies] dep1 = {}
+# I tried to patch tests to include! ../Cargo.toml.orig , however it was deleted in cargo_prep
+# so skip these tests
+comments = ["skip tests that require CARGO_BIN_EXE_rmux env set to the built `rmux` binary path" , "skip tests that require original Cargo.toml"]

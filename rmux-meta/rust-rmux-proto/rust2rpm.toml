@@ -1,0 +1,35 @@
+[requires]
+build = ["tomcli"]
+
+[scripts]
+prep.pre = [
+    "# Drop tests that require files which are not included in published crates to build",
+    "tomcli-set Cargo.toml arrays delitem test --key name 'wire_compat'"
+]
+
+[tests]
+skip = [
+    "every_ledger_some_fixture_has_corresponding_file_on_disk",
+    "every_v1_fixture_file_on_disk_has_a_ledger_entry",
+    "fixture_bytes_match_canonical_encoding",
+    "fixture_envelope_payload_length_lies_within_default_max",
+    "fixture_envelope_uses_v1_baseline",
+    "fixture_full_frame_decodes_through_decode_frame",
+    "fixture_full_frame_decodes_through_frame_decoder_in_byte_pieces",
+    "fixture_full_frame_decodes_through_frame_decoder_in_one_shot",
+    "fixture_full_frame_decodes_through_frame_decoder_with_max_length_at_payload_size",
+    "fixture_payload_first_four_bytes_match_ledger_bincode_tag",
+    "fixture_round_trips_decode_then_re_encode_byte_for_byte",
+    "fixture_truncated_by_one_byte_is_rejected",
+    "fixture_with_trailing_byte_is_rejected_by_decode_frame",
+    "frame_decoder_clears_buffer_after_bad_magic_and_keeps_working",
+    "frame_decoder_handles_back_to_back_request_fixtures",
+    "frame_decoder_recovers_after_payload_decode_error",
+    "frame_decoder_rejects_corrupt_fixture_magic",
+    "frame_decoder_rejects_payload_exactly_one_byte_over_max",
+    "frame_decoder_rejects_unsupported_wire_version",
+    "frame_decoder_with_zero_byte_chunks_still_decodes",
+    "payload_only_bincode_roundtrip_supplements_full_frame_coverage"
+]
+skip-exact = true
+comments = ["skip tests that require files which are not included in published crates to run"]

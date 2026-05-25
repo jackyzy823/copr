@@ -1,0 +1,31 @@
+--- rmux-pty-0.3.0/Cargo.toml	2006-07-24T01:21:28+00:00
++++ rmux-pty-0.3.0/Cargo.toml	2026-05-25T02:55:06.581031+00:00
+@@ -71,28 +71,3 @@
+     "fs",
+ ]
+ 
+-[target."cfg(windows)".dependencies.windows-sys]
+-version = "0.61.2"
+-features = [
+-    "Win32_Foundation",
+-    "Win32_Security",
+-    "Win32_System_Console",
+-    "Win32_System_Diagnostics_ToolHelp",
+-    "Win32_System_IO",
+-    "Win32_System_Pipes",
+-    "Win32_Storage_FileSystem",
+-    "Win32_System_JobObjects",
+-    "Win32_System_SystemInformation",
+-    "Win32_System_Threading",
+-]
+-
+-[target."cfg(windows)".dev-dependencies.tokio]
+-version = "1.52.1"
+-features = [
+-    "io-util",
+-    "macros",
+-    "net",
+-    "rt-multi-thread",
+-    "sync",
+-    "time",
+-]

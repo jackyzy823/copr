@@ -1,0 +1,27 @@
+
+rmux-types --> rmux-proto --> rmux
+rmux-ipc -> rmux-server
+
+rmux:
+        (crate(rmux-client/default) >= 0.3.0 with crate(rmux-client/default) < 0.4.0~) is needed by rust-rmux-0.3.0-1.fc45.x86_64
+        (crate(rmux-core/default) >= 0.3.0 with crate(rmux-core/default) < 0.4.0~) is needed by rust-rmux-0.3.0-1.fc45.x86_64
+        done
+        (crate(rmux-os/default) >= 0.3.0 with crate(rmux-os/default) < 0.4.0~) is needed by rust-rmux-0.3.0-1.fc45.x86_64
+        done
+        (crate(rmux-proto/default) >= 0.3.0 with crate(rmux-proto/default) < 0.4.0~) is needed by rust-rmux-0.3.0-1.fc45.x86_64
+        done
+        (crate(rmux-pty/default) >= 0.3.0 with crate(rmux-pty/default) < 0.4.0~) is needed by rust-rmux-0.3.0-1.fc45.x86_64
+        done
+        (crate(rmux-sdk/default) >= 0.3.0 with crate(rmux-sdk/default) < 0.4.0~) is needed by rust-rmux-0.3.0-1.fc45.x86_64
+        done
+        (crate(rmux-server/default) >= 0.3.0 with crate(rmux-server/default) < 0.4.0~) is needed by rust-rmux-0.3.0-1.fc45.x86_64
+        done
+        (crate(rustix/default) >= 1.1.4 with crate(rustix/default) < 2.0.0~) is needed by rust-rmux-0.3.0-1.fc45.x86_64
+        (crate(rustix/event) >= 1.1.4 with crate(rustix/event) < 2.0.0~) is needed by rust-rmux-0.3.0-1.fc45.x86_64
+        (crate(rustix/termios) >= 1.1.4 with crate(rustix/termios) < 2.0.0~) is needed by rust-rmux-0.3.0-1.fc45.x86_64
+        (crate(tokio/default) >= 1.48.0 with crate(tokio/default) < 2.0.0~) is needed by rust-rmux-0.3.0-1.fc45.x86_64
+        (crate(tokio/net) >= 1.48.0 with crate(tokio/net) < 2.0.0~) is needed by rust-rmux-0.3.0-1.fc45.x86_64
+        (crate(tokio/rt) >= 1.48.0 with crate(tokio/rt) < 2.0.0~) is needed by rust-rmux-0.3.0-1.fc45.x86_64
+        (crate(tokio/rt-multi-thread) >= 1.48.0 with crate(tokio/rt-multi-thread) < 2.0.0~) is needed by rust-rmux-0.3.0-1.fc45.x86_64
+        (crate(tokio/time) >= 1.48.0 with crate(tokio/time) < 2.0.0~) is needed by rust-rmux-0.3.0-1.fc45.x86_64
+
