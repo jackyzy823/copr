@@ -1,0 +1,77 @@
+diff -up sandlock-core-0.7.0/src/http_acl.rs.ori sandlock-core-0.7.0/src/http_acl.rs
+--- sandlock-core-0.7.0/src/http_acl.rs.ori	2026-05-25 15:55:28.486011247 +0000
++++ sandlock-core-0.7.0/src/http_acl.rs	2026-05-28 09:11:29.625322043 +0000
+@@ -5,7 +5,8 @@ use std::sync::Arc;
+ 
+ use hudsucker::certificate_authority::RcgenAuthority;
+ use hudsucker::hyper::{Request, Response, StatusCode};
+-use hudsucker::rcgen::{CertificateParams, KeyPair};
++use hudsucker::rcgen::{CertificateParams, Issuer, KeyPair};
++use hudsucker::rustls::crypto::ring;
+ use hudsucker::{Body, HttpContext, HttpHandler, Proxy, RequestOrResponse};
+ use tokio::net::TcpListener;
+ use tokio::sync::oneshot;
+@@ -226,7 +227,7 @@ pub async fn spawn_http_acl_proxy(
+ ) -> std::io::Result<HttpAclProxyHandle> {
+     // Load CA for HTTPS MITM if provided.
+ 
+-    let (key_pair, cert) = if let (Some(cert_path), Some(key_path)) = (ca_cert, ca_key) {
++    let issuer = if let (Some(cert_path), Some(key_path)) = (ca_cert, ca_key) {
+         let key_pem = std::fs::read_to_string(key_path).map_err(|e| {
+             std::io::Error::new(e.kind(), format!("failed to read --https-key {:?}: {e}", key_path))
+         })?;
+@@ -236,13 +237,10 @@ pub async fn spawn_http_acl_proxy(
+         let kp = KeyPair::from_pem(&key_pem).map_err(|e| {
+             std::io::Error::new(std::io::ErrorKind::InvalidData, format!("invalid CA key: {e}"))
+         })?;
+-        let params = CertificateParams::from_ca_cert_pem(&cert_pem).map_err(|e| {
++        let issuer = Issuer::from_ca_cert_pem(&cert_pem, kp).map_err(|e| {
+             std::io::Error::new(std::io::ErrorKind::InvalidData, format!("invalid CA cert: {e}"))
+         })?;
+-        let cert = params.self_signed(&kp).map_err(|e| {
+-            std::io::Error::new(std::io::ErrorKind::InvalidData, format!("CA cert error: {e}"))
+-        })?;
+-        (kp, cert)
++        issuer
+     } else {
+         // HTTP-only mode — reuse a lazily-generated dummy CA to avoid
+         // expensive keygen on every spawn.
+@@ -252,17 +250,14 @@ pub async fn spawn_http_acl_proxy(
+         let kp = KeyPair::from_pem(std::str::from_utf8(key_pem).unwrap()).map_err(|e| {
+             std::io::Error::new(std::io::ErrorKind::Other, format!("dummy CA key: {e}"))
+         })?;
+-        let params = CertificateParams::from_ca_cert_pem(std::str::from_utf8(cert_pem).unwrap())
++        let issuer = Issuer::from_ca_cert_pem(std::str::from_utf8(cert_pem).unwrap(), kp)
+             .map_err(|e| {
+                 std::io::Error::new(std::io::ErrorKind::Other, format!("dummy CA cert: {e}"))
+             })?;
+-        let cert = params.self_signed(&kp).map_err(|e| {
+-            std::io::Error::new(std::io::ErrorKind::Other, format!("dummy CA sign: {e}"))
+-        })?;
+-        (kp, cert)
++        issuer
+     };
+ 
+-    let ca = RcgenAuthority::new(key_pair, cert, 1_000);
++    let ca = RcgenAuthority::new(issuer, 1_000, ring::default_provider());
+ 
+     let orig_dest: OrigDestMap = Arc::new(std::sync::RwLock::new(HashMap::new()));
+ 
+@@ -280,13 +275,15 @@ pub async fn spawn_http_acl_proxy(
+ 
+     let proxy = Proxy::builder()
+         .with_listener(listener)
+-        .with_rustls_client()
+         .with_ca(ca)
++        .with_rustls_connector(ring::default_provider())
+         .with_http_handler(handler)
+         .with_graceful_shutdown(async {
+             let _ = shutdown_rx.await;
+         })
+-        .build();
++        .build().map_err(|e| {
++            std::io::Error::new(std::io::ErrorKind::Other, format!("failed to build proxy: {e}"))
++        })?;
+ 
+     tokio::spawn(async move {
+         if let Err(e) = proxy.start().await {

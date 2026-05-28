@@ -1,0 +1,18 @@
+[package]
+license-files = [
+  "LICENSE",
+]
+
+[[package.extra-sources]]
+number = 2
+file = "https://raw.githubusercontent.com/multikernel/sandlock/refs/tags/v%{version}/LICENSE"
+comments = [
+  "include license file",
+  "TODO https://github.com/multikernel/sandlock/pull/XX",
+]
+
+[scripts]
+prep.post = ["""\
+# copy in license file
+cp -p %{SOURCE2} .
+"""]

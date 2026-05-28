@@ -1,0 +1,38 @@
+[package]
+license-files = [
+  "LICENSE",
+]
+
+[[package.extra-sources]]
+number = 2
+file = "https://raw.githubusercontent.com/multikernel/sandlock/refs/tags/v%{version}/LICENSE"
+comments = [
+  "include license file",
+  "TODO https://github.com/multikernel/sandlock/pull/XX",
+]
+
+[[package.extra-patches]]
+number = 2
+file = "compile-with-hudsucker-0.24.diff"
+# Using `ring` is ok. Fedora drops aws_lc_rs in rustls, and use `ring` instead as default in rustls.
+comments = [ "Fix build issue with hudsucker 0.24." ]
+
+
+[requires]
+build = ["tomcli"]
+test = ["hostname"]
+
+[scripts]
+prep.pre = [
+  "# update hudsucker to 0.24",
+  "tomcli-set Cargo.toml str dependencies.hudsucker.version 0.24"
+]
+prep.post = ["""\
+# copy in license file
+cp -p %{SOURCE2} .
+"""]
+
+[tests]
+skip = [ "test_chroot", "test_policy_fn::test_policy_fn_audit", "test_sandbox::test_nested_sandbox"]
+comments = [ "rootfs-helper not found for tests, it is compiled from rootfs-helper.c which is not packaged in crate", "requires /etc/hostname file which is not bounded in nspawn" ]
+# and some other tests might not work under container env?
