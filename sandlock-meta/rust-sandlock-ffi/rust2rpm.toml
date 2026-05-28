@@ -1,0 +1,77 @@
+[package]
+# bin-package-name should we name it as sandlock-ffi-devel
+bin-package-name = "libsandlock_ffi"
+license-files = [
+  "LICENSE",
+]
+#extra-files = [
+#    "%{_libdir}/libsandlock_ffi.so.0.7",
+#]
+# see how rust-rpm-sequioa does
+package-extra = """
+# a tricky way to append so file with soversion variable to libsandlock_ffi
+%global soversion 0.7
+%{_libdir}/libsandlock_ffi.so.%{soversion}
+
+%package     -n libsandlock_ffi-devel
+Summary:        %{summary}
+Requires:       libsandlock_ffi%{?_isa} = %{version}-%{release}
+
+%description -n libsandlock_ffi-devel %{_description}
+
+%files       -n libsandlock_ffi-devel
+%{_libdir}/libsandlock_ffi.so
+%{_includedir}/sandlock.h
+
+%package     -n libsandlock_ffi-static
+Summary:        %{summary}
+Requires:       libsandlock_ffi-devel%{?_isa} = %{version}-%{release}
+
+%description -n libsandlock_ffi-static %{_description}
+
+%files       -n libsandlock_ffi-static
+%{_libdir}/libsandlock_ffi.a
+"""
+suppress-cdylib-install-fixme = true
+
+[[package.extra-sources]]
+number = 2
+file = "https://raw.githubusercontent.com/multikernel/sandlock/refs/tags/v%{version}/LICENSE"
+comments = [
+  "include license file",
+  "TODO https://github.com/multikernel/sandlock/pull/XX",
+]
+
+[scripts]
+prep.post = ["""\
+# copy in license file
+cp -p %{SOURCE2} .
+""",
+# Should ask upstream to use cargo-c or at least cdylib_link_lines/ plain rustc-link-arg-cdylib in build.rs
+"#Either use sed or use a patch to modify build.rs to pass -Wl,-soname,libsandlock_ffi.so.%{soversion} to cargo::rustc-link-arg-cdylib=",
+"""sed -i '/fn main/a \\ \\ \\ \\ println!("cargo::rustc-link-arg-cdylib=-Wl,-soname,libsandlock_ffi.so.%{soversion}");' build.rs"""
+]
+
+# build.pre = [
+#     "# build script uses environment variables to populate the pkgconfig file",
+#     "export PREFIX=\"%{_prefix}\"",
+#     "export LIBDIR=\"%{_libdir}\"",
+# ]
+
+install.post = [
+    "# install shared library",
+    "mkdir -p %{buildroot}/%{_libdir}",
+    # soname requires custom rustc linker flag , see rpm-sequioa/build.rs search soname, and/or https://github.com/rust-lang/cargo/issues/5045 and/or https://github.com/lu-zero/cargo-c/issues/345
+    "cp -pav target/release/libsandlock_ffi.so %{buildroot}/%{_libdir}/libsandlock_ffi.so.%{soversion}",
+    # "cp -pav target/release/libsandlock_ffi.so %{buildroot}/%{_libdir}/libsandlock_ffi.so",
+    "cp -pav target/release/libsandlock_ffi.a %{buildroot}/%{_libdir}/libsandlock_ffi.a",
+    "mkdir -p %{buildroot}/%{_includedir}",
+    "cp -pav include/sandlock.h %{buildroot}/%{_includedir}/sandlock.h",
+    # "# create unversioned symlink",
+    "ln -s libsandlock_ffi.so.%{soversion} %{buildroot}/%{_libdir}/libsandlock_ffi.so",
+    # "# install pkg-config file",
+    # "mkdir -p %{buildroot}/%{_libdir}/pkgconfig",
+    # "cp -pav target/release/sandlock-ffi.pc %{buildroot}/%{_libdir}/pkgconfig/",
+]
+
+

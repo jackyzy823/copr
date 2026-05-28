@@ -1,0 +1,36 @@
+diff -up sandlock-0.7.0/pyproject.toml.ori sandlock-0.7.0/pyproject.toml
+--- sandlock-0.7.0/pyproject.toml.ori	2026-05-29 07:43:18.608023649 +0000
++++ sandlock-0.7.0/pyproject.toml	2026-05-29 07:43:32.051182700 +0000
+@@ -1,5 +1,5 @@
+ [build-system]
+-requires = ["setuptools>=64", "setuptools-rust>=1.7"]
++requires = ["setuptools>=64"]
+ build-backend = "setuptools.build_meta"
+ 
+ [project]
+diff -up sandlock-0.7.0/setup.py.ori sandlock-0.7.0/setup.py
+--- sandlock-0.7.0/setup.py.ori	2026-05-29 07:49:56.883235184 +0000
++++ sandlock-0.7.0/setup.py	2026-05-29 07:53:45.510298185 +0000
+@@ -3,21 +3,11 @@
+ from pathlib import Path
+ 
+ from setuptools import setup
+-from setuptools_rust import Binding, RustExtension
+ 
+-# Read README from project root for PyPI description.
+-RUST_DIR = Path(__file__).parent.parent
+-readme_path = RUST_DIR / "README.md"
++readme_path = Path(__file__).parent / "README.md"
+ long_description = readme_path.read_text(encoding="utf-8") if readme_path.exists() else ""
+ 
+ setup(
+-    rust_extensions=[
+-        RustExtension(
+-            "sandlock.libsandlock_ffi",
+-            path="../crates/sandlock-ffi/Cargo.toml",
+-            binding=Binding.NoBinding,
+-        ),
+-    ],
+     long_description=long_description,
+     long_description_content_type="text/markdown",
+ )
