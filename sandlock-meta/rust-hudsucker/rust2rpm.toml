@@ -1,0 +1,12 @@
+[requires]
+build = ["tomcli"]
+
+[scripts]
+prep.pre = [
+    "# Remove dev dependencie",
+    "tomcli-set Cargo.toml del dev-dependencies.criterion",
+]
+
+[tests]
+run = false
+comments = ["tests depend on aws_lc_rs which is dropped in Fedora's rustls package"]

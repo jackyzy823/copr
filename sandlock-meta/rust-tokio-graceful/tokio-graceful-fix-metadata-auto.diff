@@ -1,0 +1,21 @@
+--- tokio-graceful-0.2.2/Cargo.toml	1970-01-01T00:00:01+00:00
++++ tokio-graceful-0.2.2/Cargo.toml	2026-05-25T14:41:59.320559+00:00
+@@ -102,13 +102,6 @@
+ version = "0.3"
+ features = ["env-filter"]
+ 
+-[target."cfg(loom)".dependencies.loom]
+-version = "0.7"
+-features = [
+-    "futures",
+-    "checkpoint",
+-]
+-
+ [target."cfg(not(loom))".dev-dependencies.bytes]
+ version = "1"
+ 
+@@ -137,3 +130,4 @@
+ level = "allow"
+ priority = 0
+ check-cfg = ["cfg(loom)"]
++
