@@ -5,7 +5,7 @@
 %global crate sandlock-core
 
 Name:           rust-sandlock-core
-Version:        0.7.0
+Version:        0.8.1
 Release:        %autorelease
 Summary:        Lightweight process sandbox using Landlock, seccomp-bpf, and seccomp user notification
 
@@ -56,6 +56,18 @@ use the "default" feature of the "%{crate}" crate.
 %files       -n %{name}+default-devel
 %ghost %{crate_instdir}/Cargo.toml
 
+%package     -n %{name}+cli-devel
+Summary:        %{summary}
+BuildArch:      noarch
+
+%description -n %{name}+cli-devel %{_description}
+
+This package contains library source intended for building other packages which
+use the "cli" feature of the "%{crate}" crate.
+
+%files       -n %{name}+cli-devel
+%ghost %{crate_instdir}/Cargo.toml
+
 %prep
 %autosetup -n %{crate}-%{version} -p1
 # update hudsucker to 0.24
@@ -79,10 +91,14 @@ cp -p %{SOURCE2} .
 # * rootfs-helper not found for tests, it is compiled from rootfs-helper.c which
 #   is not packaged in crate
 # * requires /etc/hostname file which is not bounded in nspawn
+# * according to readme, http host will be resolved at sandlock startup which
+#   requires internet
 %{cargo_test -- -- %{shrink:
     --skip test_chroot
     --skip test_policy_fn::test_policy_fn_audit
     --skip test_sandbox::test_nested_sandbox
+    --skip test_http_acl::test_http_ipv6_non_intercepted_port
+    --skip test_http_acl::test_http_non_intercepted_port
 }}
 %endif
 

@@ -33,6 +33,6 @@ cp -p %{SOURCE2} .
 """]
 
 [tests]
-skip = [ "test_chroot", "test_policy_fn::test_policy_fn_audit", "test_sandbox::test_nested_sandbox"]
-comments = [ "rootfs-helper not found for tests, it is compiled from rootfs-helper.c which is not packaged in crate", "requires /etc/hostname file which is not bounded in nspawn" ]
+skip = [ "test_chroot", "test_policy_fn::test_policy_fn_audit", "test_sandbox::test_nested_sandbox", "test_http_acl::test_http_ipv6_non_intercepted_port", "test_http_acl::test_http_non_intercepted_port" ]
+comments = [ "rootfs-helper not found for tests, it is compiled from rootfs-helper.c which is not packaged in crate", "requires /etc/hostname file which is not bounded in nspawn", "according to readme, http host will be resolved at sandlock startup which requires internet" ]
 # and some other tests might not work under container env?

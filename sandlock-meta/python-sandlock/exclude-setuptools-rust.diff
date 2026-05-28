@@ -1,6 +1,6 @@
-diff -up sandlock-0.7.0/pyproject.toml.ori sandlock-0.7.0/pyproject.toml
---- sandlock-0.7.0/pyproject.toml.ori	2026-05-29 07:43:18.608023649 +0000
-+++ sandlock-0.7.0/pyproject.toml	2026-05-29 07:43:32.051182700 +0000
+diff -up sandlock-0.8.1/pyproject.toml.ori sandlock-0.8.1/pyproject.toml
+--- sandlock-0.8.1/pyproject.toml.ori	2026-05-29 15:13:00.756168209 +0000
++++ sandlock-0.8.1/pyproject.toml	2026-05-29 15:14:02.478605353 +0000
 @@ -1,5 +1,5 @@
  [build-system]
 -requires = ["setuptools>=64", "setuptools-rust>=1.7"]
@@ -8,9 +8,9 @@ diff -up sandlock-0.7.0/pyproject.toml.ori sandlock-0.7.0/pyproject.toml
  build-backend = "setuptools.build_meta"
  
  [project]
-diff -up sandlock-0.7.0/setup.py.ori sandlock-0.7.0/setup.py
---- sandlock-0.7.0/setup.py.ori	2026-05-29 07:49:56.883235184 +0000
-+++ sandlock-0.7.0/setup.py	2026-05-29 07:53:45.510298185 +0000
+diff -up sandlock-0.8.1/setup.py.ori sandlock-0.8.1/setup.py
+--- sandlock-0.8.1/setup.py.ori	2026-05-29 15:12:55.174152731 +0000
++++ sandlock-0.8.1/setup.py	2026-05-29 15:13:46.689295575 +0000
 @@ -3,21 +3,11 @@
  from pathlib import Path
  

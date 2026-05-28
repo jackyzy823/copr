@@ -5,12 +5,12 @@ license-files = [
   "LICENSE",
 ]
 #extra-files = [
-#    "%{_libdir}/libsandlock_ffi.so.0.7",
+#    "%{_libdir}/libsandlock_ffi.so.0.8",
 #]
 # see how rust-rpm-sequioa does
 package-extra = """
 # a tricky way to append so file with soversion variable to libsandlock_ffi
-%global soversion 0.7
+%global soversion 0.8
 %{_libdir}/libsandlock_ffi.so.%{soversion}
 
 %package     -n libsandlock_ffi-devel
@@ -40,6 +40,14 @@ file = "https://raw.githubusercontent.com/multikernel/sandlock/refs/tags/v%{vers
 comments = [
   "include license file",
   "TODO https://github.com/multikernel/sandlock/pull/XX",
+]
+
+#either patch or skip test
+[[package.extra-patches]]
+number = 2
+file = "fix-smoke-test-search-path.diff"
+comments = [
+  "find libsandlock_ffi.so in current target folder instead of workspace target folder for handler_smoke compile time",
 ]
 
 [scripts]
@@ -72,6 +80,16 @@ install.post = [
     # "# install pkg-config file",
     # "mkdir -p %{buildroot}/%{_libdir}/pkgconfig",
     # "cp -pav target/release/sandlock-ffi.pc %{buildroot}/%{_libdir}/pkgconfig/",
+    # For tests, help handler_smoke find so in runtime
+    "%if %{with check}",
+    "ln -s libsandlock_ffi.so target/release/libsandlock_ffi.so.%{soversion}",
+    "%endif"
 ]
 
-
+# [tests]
+# skip = ["c_smoke_compiles_and_runs"]
+# skip-exact = true
+# # See c_smoke.rs CARGO_TARGET_DIR is not set in tests (https://github.com/rust-lang/cargo/issues/2841) and (https://doc.rust-lang.org/cargo/commands/cargo-test.html#option-cargo-test---target-dir)
+# # so it will use workspace target folder: CARGO_MANIFEST_DIR/../../target/release to find libsandlock_ffi.so
+# # so we skip or edit c_smoke.rs to not find parent.parent for cargo_manifest_dir
+# comments = [ "skip a test which requires working dir in workspace" ]

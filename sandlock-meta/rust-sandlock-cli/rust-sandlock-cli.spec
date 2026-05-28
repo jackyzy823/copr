@@ -4,7 +4,7 @@
 %global crate sandlock-cli
 
 Name:           rust-sandlock-cli
-Version:        0.7.0
+Version:        0.8.1
 Release:        %autorelease
 Summary:        CLI for sandlock process sandbox
 

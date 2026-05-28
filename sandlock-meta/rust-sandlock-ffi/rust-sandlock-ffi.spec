@@ -4,7 +4,7 @@
 %global crate sandlock-ffi
 
 Name:           rust-sandlock-ffi
-Version:        0.7.0
+Version:        0.8.1
 Release:        %autorelease
 Summary:        C ABI for sandlock process sandbox
 
@@ -14,6 +14,9 @@ Source:         %{crates_source}
 # * include license file
 # * TODO https://github.com/multikernel/sandlock/pull/XX
 Source2:        https://raw.githubusercontent.com/multikernel/sandlock/refs/tags/v%{version}/LICENSE
+# * find libsandlock_ffi.so in current target folder instead of workspace target
+#   folder for handler_smoke compile time
+Patch2:         fix-smoke-test-search-path.diff
 
 BuildRequires:  cargo-rpm-macros >= 24
 
@@ -51,7 +54,7 @@ License:        Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause AND CDLA-Permissive
 %doc README.md
 
 # a tricky way to append so file with soversion variable to libsandlock_ffi
-%global soversion 0.7
+%global soversion 0.8
 %{_libdir}/libsandlock_ffi.so.%{soversion}
 
 %package     -n libsandlock_ffi-devel
@@ -73,6 +76,32 @@ Requires:       libsandlock_ffi-devel%{?_isa} = %{version}-%{release}
 %files       -n libsandlock_ffi-static
 %{_libdir}/libsandlock_ffi.a
 
+%package        devel
+Summary:        %{summary}
+BuildArch:      noarch
+
+%description    devel %{_description}
+
+This package contains library source intended for building other packages which
+use the "%{crate}" crate.
+
+%files          devel
+%license %{crate_instdir}/LICENSE
+%doc %{crate_instdir}/README.md
+%{crate_instdir}/
+
+%package     -n %{name}+default-devel
+Summary:        %{summary}
+BuildArch:      noarch
+
+%description -n %{name}+default-devel %{_description}
+
+This package contains library source intended for building other packages which
+use the "default" feature of the "%{crate}" crate.
+
+%files       -n %{name}+default-devel
+%ghost %{crate_instdir}/Cargo.toml
+
 %prep
 %autosetup -n %{crate}-%{version} -p1
 %cargo_prep
@@ -91,6 +120,7 @@ sed -i '/fn main/a \ \ \ \ println!("cargo::rustc-link-arg-cdylib=-Wl,-soname,li
 %{cargo_license} > LICENSE.dependencies
 
 %install
+%cargo_install
 # install shared library
 mkdir -p %{buildroot}/%{_libdir}
 cp -pav target/release/libsandlock_ffi.so %{buildroot}/%{_libdir}/libsandlock_ffi.so.%{soversion}
@@ -98,6 +128,9 @@ cp -pav target/release/libsandlock_ffi.a %{buildroot}/%{_libdir}/libsandlock_ffi
 mkdir -p %{buildroot}/%{_includedir}
 cp -pav include/sandlock.h %{buildroot}/%{_includedir}/sandlock.h
 ln -s libsandlock_ffi.so.%{soversion} %{buildroot}/%{_libdir}/libsandlock_ffi.so
+%if %{with check}
+ln -s libsandlock_ffi.so target/release/libsandlock_ffi.so.%{soversion}
+%endif
 
 %if %{with check}
 %check

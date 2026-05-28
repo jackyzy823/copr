@@ -1,6 +1,6 @@
-diff -up sandlock-core-0.7.0/src/http_acl.rs.ori sandlock-core-0.7.0/src/http_acl.rs
---- sandlock-core-0.7.0/src/http_acl.rs.ori	2026-05-25 15:55:28.486011247 +0000
-+++ sandlock-core-0.7.0/src/http_acl.rs	2026-05-28 09:11:29.625322043 +0000
+diff -up sandlock-core-0.8.1/src/http_acl.rs.ori sandlock-core-0.8.1/src/http_acl.rs
+--- sandlock-core-0.8.1/src/http_acl.rs.ori	2026-05-28 15:54:47.342350388 +0000
++++ sandlock-core-0.8.1/src/http_acl.rs	2026-05-28 15:57:18.347478242 +0000
 @@ -5,7 +5,8 @@ use std::sync::Arc;
  
  use hudsucker::certificate_authority::RcgenAuthority;
@@ -18,7 +18,7 @@ diff -up sandlock-core-0.7.0/src/http_acl.rs.ori sandlock-core-0.7.0/src/http_ac
 -    let (key_pair, cert) = if let (Some(cert_path), Some(key_path)) = (ca_cert, ca_key) {
 +    let issuer = if let (Some(cert_path), Some(key_path)) = (ca_cert, ca_key) {
          let key_pem = std::fs::read_to_string(key_path).map_err(|e| {
-             std::io::Error::new(e.kind(), format!("failed to read --https-key {:?}: {e}", key_path))
+             std::io::Error::new(e.kind(), format!("failed to read --http-key {:?}: {e}", key_path))
          })?;
 @@ -236,13 +237,10 @@ pub async fn spawn_http_acl_proxy(
          let kp = KeyPair::from_pem(&key_pem).map_err(|e| {
