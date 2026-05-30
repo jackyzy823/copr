@@ -1,0 +1,4 @@
+[tests]
+skip = [ "mnt::test::mount_unmount", "unmount_no_send"]
+skip-exact = true
+comments = [ "tests require mount which might fail in container env"]
