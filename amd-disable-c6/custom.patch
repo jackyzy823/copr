@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index 5159a7b..d1af26b 100644
+index 5159a7b..1dfde53 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -1,7 +1,7 @@
@@ -11,12 +11,15 @@ index 5159a7b..d1af26b 100644
  cppfiles = $(name).cpp
  all: $(name)
  
-@@ -11,7 +11,7 @@ $(name):$(cppfiles)
+@@ -9,9 +9,9 @@ $(name):$(cppfiles)
+ 	$(CXX) $(CXXFLAGS) $(cppfiles) -o $(name)
+ 
  install: $(name)
- 	mkdir -p $(DESTDIR)/usr/sbin
+-	mkdir -p $(DESTDIR)/usr/sbin
++	mkdir -p $(DESTDIR)/usr/bin
  	mkdir -p $(DESTDIR)/usr/lib/systemd/system
 -	install -m 540 $(name) $(DESTDIR)/usr/sbin
-+	install -m 755 $(name) $(DESTDIR)/usr/sbin
++	install -m 755 $(name) $(DESTDIR)/usr/bin
  	install -m 644 $(name).service $(DESTDIR)/usr/lib/systemd/system
  
  uninstall:
