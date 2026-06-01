@@ -1,5 +1,5 @@
 Name:           python-sandlock
-Version:        0.8.1
+Version:        0.8.2
 Release:        %autorelease
 # Fill in the actual package summary to submit package to Fedora
 Summary:        Lightweight process sandbox using Landlock, seccomp, and seccomp user notification

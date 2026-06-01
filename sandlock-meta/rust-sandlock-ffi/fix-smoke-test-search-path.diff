@@ -1,6 +1,6 @@
-diff -up sandlock-ffi-0.8.1/tests/c_smoke.rs.ori sandlock-ffi-0.8.1/tests/c_smoke.rs
---- sandlock-ffi-0.8.1/tests/c_smoke.rs.ori	2026-05-30 01:38:29.581235340 +0000
-+++ sandlock-ffi-0.8.1/tests/c_smoke.rs	2026-05-30 04:47:48.140198602 +0000
+diff -up sandlock-ffi-0.8.2/tests/c_smoke.rs.ori sandlock-ffi-0.8.2/tests/c_smoke.rs
+--- sandlock-ffi-0.8.2/tests/c_smoke.rs.ori	2026-05-30 01:38:29.581235340 +0000
++++ sandlock-ffi-0.8.2/tests/c_smoke.rs	2026-05-30 04:47:48.140198602 +0000
 @@ -12,10 +12,6 @@ fn c_smoke_compiles_and_runs() {
          .map(PathBuf::from)
          .unwrap_or_else(|| {

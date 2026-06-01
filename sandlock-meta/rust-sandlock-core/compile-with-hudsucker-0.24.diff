@@ -1,6 +1,6 @@
-diff -up sandlock-core-0.8.1/src/http_acl.rs.ori sandlock-core-0.8.1/src/http_acl.rs
---- sandlock-core-0.8.1/src/http_acl.rs.ori	2026-05-28 15:54:47.342350388 +0000
-+++ sandlock-core-0.8.1/src/http_acl.rs	2026-05-28 15:57:18.347478242 +0000
+diff -up sandlock-core-0.8.2/src/http_acl.rs.ori sandlock-core-0.8.2/src/http_acl.rs
+--- sandlock-core-0.8.2/src/http_acl.rs.ori	2026-05-28 15:54:47.342350388 +0000
++++ sandlock-core-0.8.2/src/http_acl.rs	2026-05-28 15:57:18.347478242 +0000
 @@ -5,7 +5,8 @@ use std::sync::Arc;
  
  use hudsucker::certificate_authority::RcgenAuthority;

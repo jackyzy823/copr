@@ -4,7 +4,7 @@
 %global crate sandlock-ffi
 
 Name:           rust-sandlock-ffi
-Version:        0.8.1
+Version:        0.8.2
 Release:        %autorelease
 Summary:        C ABI for sandlock process sandbox
 

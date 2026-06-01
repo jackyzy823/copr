@@ -5,7 +5,7 @@
 %global crate sandlock-core
 
 Name:           rust-sandlock-core
-Version:        0.8.1
+Version:        0.8.2
 Release:        %autorelease
 Summary:        Lightweight process sandbox using Landlock, seccomp-bpf, and seccomp user notification
 
