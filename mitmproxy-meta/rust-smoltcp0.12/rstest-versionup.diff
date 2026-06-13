@@ -1,0 +1,12 @@
+diff -up smoltcp-0.12.0/src/socket/dhcpv4.rs.ori smoltcp-0.12.0/src/socket/dhcpv4.rs
+--- smoltcp-0.12.0/src/socket/dhcpv4.rs.ori	2026-05-21 16:21:01.069228749 +0000
++++ smoltcp-0.12.0/src/socket/dhcpv4.rs	2026-05-21 16:21:12.083482599 +0000
+@@ -1064,7 +1064,7 @@ mod test {
+ 
+     use crate::phy::Medium;
+     use crate::tests::setup;
+-    use rstest::*;
++    use rstest::rstest;
+ 
+     fn socket(medium: Medium) -> TestSocket {
+         let (iface, _, _) = setup(medium);

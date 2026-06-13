@@ -1,0 +1,18 @@
+[[package.extra-patches]]
+number = 2
+file = "doctest.diff"
+comments = [ "lint `box_pointers` has been removed: it does not detect other kinds of allocations, and existed only for historical reasons" ]
+
+[requires]
+build = [ "tomcli" ]
+
+[scripts]
+prep.pre = [ 
+    "# Adjust dev-dependencies rand version",
+    "tomcli-set Cargo.toml str dev-dependencies.rand.version 0.7",
+]
+
+[tests]
+skip = [ "test::iter::it_yields_the_most_recent_items_first", "test::notify_iter::it_yields_the_most_recent_items_first" ]
+skip-exact = true
+comments = [ "These two tests shouldn't be skipped because it is a fatal error.An issue is opened https://github.com/maidsafe/lru_time_cache/issues/162. However mitmproxy-rs doesn't use iteration of lru_time_cache." ]

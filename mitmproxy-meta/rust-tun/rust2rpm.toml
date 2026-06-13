@@ -1,0 +1,32 @@
+[package]
+license-files = [
+  "copying"
+]
+
+[[package.extra-sources]]
+number = 2
+file = "https://www.wtfpl.net/txt/copying"
+comments = [
+  "include license file",
+  "TODO https://github.com/meh/rust-tun/pull/XX",
+]
+
+[requires]
+build = ["tomcli"]
+
+[scripts]
+prep.pre = [
+    "# Drop examples and dev dependencies which is only used in examples",
+    "tomcli-set Cargo.toml del example",
+    "tomcli-set Cargo.toml del dev-dependencies.packet",
+    "tomcli-set Cargo.toml del dev-dependencies.ctrlc2",
+]
+prep.post = ["""\
+# copy in license file
+cp -p %{SOURCE2} ."""]
+
+
+[tests]
+skip = [ "platform::test::create" ]
+skip-exact = true
+comments = [ "skip on test which requires to create a tun device" ]

@@ -1,0 +1,13 @@
+[requires]
+build = [ "tomcli" ]
+
+[scripts]
+prep.pre = [
+    "# Adjust dev-dependencies rand and rand_xorshift version",
+    "tomcli-set Cargo.toml str dev-dependencies.rand.version 0.7",
+    "tomcli-set Cargo.toml str dev-dependencies.rand_xorshift.version 0.2",
+]
+
+[tests]
+skip = [ "unroll_tail" ]
+comments = [ "skip an incompleted doctest" ]

@@ -1,0 +1,53 @@
+--- tun-0.7.22/Cargo.toml	1970-01-01T00:00:01+00:00
++++ tun-0.7.22/Cargo.toml	2026-06-07T16:03:16.040085+00:00
+@@ -41,9 +41,7 @@
+ async = [
+     "tokio",
+     "futures-core",
+-    "futures",
+     "tokio-util",
+-    "wintun-bindings/async",
+ ]
+ 
+ [lib]
+@@ -151,35 +149,6 @@
+ version = "0.7"
+ features = []
+ 
+-[target.'cfg(any(target_os = "macos", target_os = "freebsd"))'.dependencies.ipnet]
+-version = "2"
+-
+-[target.'cfg(target_os = "windows")'.dependencies.futures]
+-version = "0.3"
+-optional = true
+-
+-[target.'cfg(target_os = "windows")'.dependencies.windows-sys]
+-version = "0.59"
+-features = [
+-    "Win32_Foundation",
+-    "Win32_Security",
+-    "Win32_Security_WinTrust",
+-    "Win32_Security_Cryptography",
+-    "Win32_System_Threading",
+-    "Win32_UI_WindowsAndMessaging",
+-    "Win32_System_LibraryLoader",
+-]
+-
+-[target.'cfg(target_os = "windows")'.dependencies.wintun-bindings]
+-version = "^0.7.7"
+-features = [
+-    "panic_on_unsent_packets",
+-    "verify_binary_signature",
+-    "async",
+-    "enable_inner_logging",
+-    "winreg",
+-]
+-
+ [target."cfg(unix)".dependencies.nix]
+ version = "0.30"
+ features = ["ioctl"]
+@@ -190,3 +159,4 @@
+ [target."cfg(unix)".dev-dependencies.nix]
+ version = "0.30"
+ features = ["ioctl"]
++

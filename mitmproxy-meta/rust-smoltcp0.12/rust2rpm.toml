@@ -1,0 +1,15 @@
+[[package.extra-patches]]
+number = 2
+file = "rstest-versionup.diff"
+comments = [ "restrict rstest imported symbol" ]
+
+[requires]
+build = [ "tomcli" ]
+
+[scripts]
+prep.pre = [
+    "# Adjust dev-dependencies rstest version",
+    "tomcli-set Cargo.toml str dev-dependencies.rstest.version 0.26",
+]
+
+
