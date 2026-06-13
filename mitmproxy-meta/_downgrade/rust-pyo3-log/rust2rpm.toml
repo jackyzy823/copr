@@ -1,0 +1,4 @@
+[package]
+cargo-toml-patch-comments = [
+    "relax stricter-than-SemVer requirement for the syn dev-dependency",
+]
