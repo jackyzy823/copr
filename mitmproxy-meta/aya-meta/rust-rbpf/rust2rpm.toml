@@ -1,0 +1,3 @@
+[tests]
+skip = [ "'src/lib.rs'" ]
+comments = [ "skip doctests that failed due to vm" ]

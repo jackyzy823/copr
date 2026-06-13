@@ -1,0 +1,3 @@
+Problem 1: nothing provides requested (crate(aya-ebpf-bindings/default) >= 0.1.1 with crate(aya-ebpf-bindings/default) < 0.2.0~)
+ Problem 2: nothing provides requested (crate(aya-ebpf-cty/default) >= 0.2.2 with crate(aya-ebpf-cty/default) < 0.3.0~)
+ Problem 3: nothing provides requested (crate(aya-ebpf-macros/default) >= 0.1.1 with crate(aya-ebpf-macros/default) < 0.2.0~)

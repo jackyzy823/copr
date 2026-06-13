@@ -1,0 +1,35 @@
+[package]
+license-files = [
+  "LICENSE-APACHE",
+  "LICENSE-MIT",
+]
+
+[[package.extra-sources]]
+number = 2
+file = "https://raw.githubusercontent.com/aya-rs/aya/refs/tags/%{crate}-v%{version}/LICENSE-APACHE"
+comments = [
+  "include license file",
+  "TODO https://github.com/aya-rs/aya/pull/XX",
+]
+
+[[package.extra-sources]]
+number = 3
+file = "https://raw.githubusercontent.com/aya-rs/aya/refs/tags/%{crate}-v%{version}/LICENSE-MIT"
+comments = [
+  "include license file",
+  "TODO https://github.com/aya-rs/aya/pull/XX",
+]
+
+[requires]
+build = [ "tomcli" ]
+
+[scripts]
+prep.pre = [
+    "# Adjust dev-dependencies rbpf version (used in doctest only)",
+    "tomcli-set Cargo.toml str dev-dependencies.rbpf.version 0.4.0",
+]
+prep.post = ["""\
+# copy in license file
+cp -p %{SOURCE2} .
+cp -p %{SOURCE3} ."""]
+

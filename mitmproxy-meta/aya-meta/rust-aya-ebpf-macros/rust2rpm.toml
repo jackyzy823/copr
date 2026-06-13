@@ -1,0 +1,31 @@
+[package]
+license-files = [
+  "LICENSE-APACHE",
+  "LICENSE-MIT",
+]
+
+[[package.extra-sources]]
+number = 2
+file = "https://raw.githubusercontent.com/aya-rs/aya/refs/tags/%{crate}-v%{version}/LICENSE-APACHE"
+comments = [
+  "include license file",
+  "TODO https://github.com/aya-rs/aya/pull/XX",
+]
+
+[[package.extra-sources]]
+number = 3
+file = "https://raw.githubusercontent.com/aya-rs/aya/refs/tags/%{crate}-v%{version}/LICENSE-MIT"
+comments = [
+  "include license file",
+  "TODO https://github.com/aya-rs/aya/pull/XX",
+]
+
+[scripts]
+prep.post = ["""\
+# copy in license file
+cp -p %{SOURCE2} .
+cp -p %{SOURCE3} ."""]
+
+[tests]
+skip = [ "'src/lib.rs'" ]
+comments = [ "skip doctests that doesn't compile due to missing dependeny `aya_ebpf`" ]
