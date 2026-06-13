@@ -1,0 +1,8 @@
+[requires]
+build = [ "tomcli" ]
+
+[scripts]
+prep.pre = [
+    "# Drop dev-dependencies for benchmark",
+    "tomcli-set Cargo.toml del dev-dependencies.criterion",
+]
