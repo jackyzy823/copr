@@ -1,0 +1,8 @@
+Problem 1: nothing provides requested (crate(internet-packet/default) >= 0.2.3 with crate(internet-packet/default) < 0.3.0~)
+ Problem 2: nothing provides requested (crate(internet-packet/smoltcp) >= 0.2.3 with crate(internet-packet/smoltcp) < 0.3.0~)
+ Problem 3: nothing provides requested (crate(lru_time_cache/default) >= 0.11.11 with crate(lru_time_cache/default) < 0.12.0~)
+ Problem 4: nothing provides requested (crate(smoltcp/default) >= 0.12.0 with crate(smoltcp/default) < 0.13.0~)
+ Problem 5: nothing provides requested (crate(sysinfo/default) >= 0.35.2 with crate(sysinfo/default) < 0.36.0~)
+ Problem 6: nothing provides requested (crate(tun/async) >= 0.7.22 with crate(tun/async) < 0.8.0~)
+ Problem 7: nothing provides requested (crate(tun/default) >= 0.7.22 with crate(tun/default) < 0.8.0~)
+
