@@ -1,0 +1,73 @@
+[package]
+bin-package-name = "libboringtun"
+suppress-cdylib-install-fixme = true
+license-files = [
+  "LICENSE.md",
+]
+package-extra = """
+# a tricky way to append so file with soversion variable to libboringtun
+%global soversion 0.6
+%{_libdir}/libboringtun.so.%{soversion}
+
+%package     -n libboringtun-devel
+Summary:        %{summary}
+Requires:       libboringtun%{?_isa} = %{version}-%{release}
+
+%description -n libboringtun-devel %{_description}
+
+%files       -n libboringtun-devel
+%{_libdir}/libboringtun.so
+%{_includedir}/wireguard_ffi.h
+
+%bcond static 0
+%if %{with static}
+%package     -n libboringtun-static
+Summary:        %{summary}
+Requires:       libboringtun-devel%{?_isa} = %{version}-%{release}
+
+%description -n libboringtun-static %{_description}
+
+%files       -n libboringtun-static
+%{_libdir}/libboringtun.a
+%endif
+"""
+
+
+[[package.extra-sources]]
+number = 2
+file = "https://raw.githubusercontent.com/cloudflare/boringtun/refs/tags/%{crate}-%{version}/LICENSE.md"
+comments = [
+  "include license file",
+  "TODO https://github.com/cloudflare/boringtun/pull/XX",
+]
+
+[requires]
+build = [ "tomcli" ]
+
+[scripts]
+prep.pre = [
+    "# Adjust dependencies version",
+    "tomcli-set Cargo.toml str dependencies.ring.version 0.17",
+    "tomcli-set Cargo.toml str dependencies.x25519-dalek.version 2.0.1",
+    "tomcli-set Cargo.toml del dev-dependencies.criterion",
+    "tomcli-set Cargo.toml str 'target.\"cfg(unix)\".dependencies.nix.version' 0.26",
+]
+prep.post = ["""\
+# copy in license file
+cp -p %{SOURCE2} .""",
+"""echo 'fn main(){println!("cargo::rustc-link-arg-cdylib=-Wl,-soname,libboringtun.so.%{soversion}");}' > build.rs"""
+]
+install.post = [
+    "# install shared library",
+    "mkdir -p %{buildroot}/%{_libdir}",
+    # soname requires custom rustc linker flag , see rpm-sequioa/build.rs search soname, and/or https://github.com/rust-lang/cargo/issues/5045 and/or https://github.com/lu-zero/cargo-c/issues/345
+    "cp -pav target/release/libboringtun.so %{buildroot}/%{_libdir}/libboringtun.so.%{soversion}",
+    # "cp -pav target/release/libboringtun.so %{buildroot}/%{_libdir}/libboringtun.so",
+    "%if %{with static}",
+    "cp -pav target/release/libboringtun.a %{buildroot}/%{_libdir}/libboringtun.a",
+    "%endif",
+    "mkdir -p %{buildroot}/%{_includedir}",
+    "cp -pav src/wireguard_ffi.h %{buildroot}/%{_includedir}/wireguard_ffi.h",
+    # "# create unversioned symlink",
+    "ln -s libboringtun.so.%{soversion} %{buildroot}/%{_libdir}/libboringtun.so",
+]

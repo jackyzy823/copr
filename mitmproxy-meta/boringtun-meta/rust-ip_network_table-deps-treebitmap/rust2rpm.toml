@@ -1,0 +1,12 @@
+[requires]
+build = [ "tomcli" ]
+
+[scripts]
+prep.pre = [
+    "# Drop dev-dependencies used in tests which we have already skipped",
+    "tomcli-set Cargo.toml del dev-dependencies.rand",
+]
+
+[tests]
+run = false
+comments = [ "skip tests because symbol is not imported in tests" ]
