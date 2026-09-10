@@ -1,7 +1,2 @@
-SHA256 (aidl.tar.gz) = 4f90c7aef6f872bf1ccea88d995905f21133a4c45b4fcdb49ab4ef823c5f1cf6
-SHA256 (core.tar.gz) = 00bcb7ae82364a34fa2b356e90a436d8d14d012dc8ae832f9ac476d27fc46a2b
-SHA256 (dalvik.tar.gz) = 476b496b578002204dcdc6b12464316f0d0fd1e1770658db37996013c651b94c
-SHA256 (libbase.tar.gz) = 6d3a76d0b99c0a3d3100dee60af8e148dce854a8e94e6404acbc17d516f2330b
-SHA256 (logging.tar.gz) = cdf0416ceb6ec4a10f1199a6cba58233accbfd36d8beb49127704cdf268b0b78
 SHA256 (scrcpy-4.1.tar.gz) = 537b2ade623cb94b6edddfa5c61bf0b0af21484aa8365ea2531b686ea573249a
 SHA256 (android-stubs-src.jar.b64) = 86b3e6fa7ffd4aa431b23b09da7c5e4e80745e020110243ee689e09c46de4153

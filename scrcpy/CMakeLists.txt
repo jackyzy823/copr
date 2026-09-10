@@ -61,6 +61,10 @@ target_link_libraries(libbase PUBLIC fmt::fmt liblog)
 find_package(BISON REQUIRED)
 find_package(FLEX REQUIRED)
 
+# in Fedora 43, cmake will not create `gen` folder automatically
+# then bison will complain about this `/usr/bin/bison: /builddir/build/BUILD/scrcpy-4.1-build/scrcpy-4.1/server/deps/redhat-linux-build/gen/position.hh: cannot open: No such file or directory`
+file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/gen")
+
 bison_target(aidl_language_y 
 	aidl/aidl_language_y.yy
 	${CMAKE_CURRENT_BINARY_DIR}/gen/aidl_language_y.cpp
