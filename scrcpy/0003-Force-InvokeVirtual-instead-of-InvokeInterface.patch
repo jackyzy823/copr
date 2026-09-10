@@ -1,0 +1,306 @@
+From ab7bf040e42687582a890d94c1bb42dde0f7042f Mon Sep 17 00:00:00 2001
+From: jackyzy823 <jackyzy823@gmail.com>
+Date: Wed, 9 Sep 2026 02:25:40 +0000
+Subject: [PATCH 3/3] Force InvokeVirtual instead of InvokeInterface
+
+Why
+
+To compile scrcpy server which could run on old devices with recent JDK.
+
+error log
+```
+java.lang.IncompatibleClassChangeError: The method 'java.lang.Class java.lang.Object.getClass()' was expected to be of type interface but instead was found to be of type virtual (declaration of 'com.genymobile.scrcpy.wrappers.PowerManager' appears in
+
+        at com.genymobile.scrcpy.wrappers.PowerManager.getIsScreenOnMethod(PowerManager.java:34)
+        at com.genymobile.scrcpy.wrappers.PowerManager.isScreenOn(PowerManager.java:43)
+        at com.genymobile.scrcpy.device.Device.isScreenOn(Device.java:88)
+        at com.genymobile.scrcpy.control.Controller.control(Controller.java:234)
+        at com.genymobile.scrcpy.control.Controller.access$500(Controller.java:45)
+        at com.genymobile.scrcpy.control.Controller$3.run(Controller.java:289)
+        at java.lang.Thread.run(Thread.java:818)
+```
+
+IInterface
+in JDK <= 17 , it will be
+```
+      48: getfield      #22                 // Field manager:Landroid/os/IInterface;
+      51: invokeinterface #58,  1           // InterfaceMethod android/os/IInterface.getClass:()Ljava/lang/Class;
+      56: ldc           #59                 // String isInteractive
+```
+
+In JDK >= 17 , it will be
+```
+      48: getfield      #22                 // Field manager:Landroid/os/IInterface;
+      51: invokeinterface #58,  1           // InterfaceMethod android/os/IInterface.getClass:()Ljava/lang/Class;
+      56: ldc           #59                 // String isInteractive
+```
+
+D8 has a fix for this change (by changing from invokeinterface to
+invokevirtual), but we use dx it will convert to dex without
+modification.
+
+Ref:
+JDK's change:
+https://bugs.openjdk.org/browse/JDK-8272564
+D8 fix
+https://issuetracker.google.com/issues/218298666
+Related
+Links to previous two urls
+https://github.com/android/android-test/issues/1642
+Said JDK<=17 is OK
+https://github.com/bytedance/Fastbot_Android/issues/290
+
+What
+
+Cast all IInterface instances to object before calling `getClass`
+
+// Instead of:
+IInterface myInterface = ...;
+Class<?> clazz = myInterface.getClass();
+
+// Do this:
+Class<?> clazz = ((Object) myInterface).getClass();
+
+How
+
+search IInterface, and getClass(), mostly in wrappers subfolder
+---
+ .../scrcpy/wrappers/ActivityManager.java      | 12 ++++----
+ .../scrcpy/wrappers/PowerManager.java         |  8 ++---
+ .../scrcpy/wrappers/StatusBarManager.java     | 10 +++----
+ .../scrcpy/wrappers/WindowManager.java        | 30 +++++++++----------
+ 4 files changed, 30 insertions(+), 30 deletions(-)
+
+diff --git a/server/src/main/java/com/genymobile/scrcpy/wrappers/ActivityManager.java b/server/src/main/java/com/genymobile/scrcpy/wrappers/ActivityManager.java
+index 01508888..0089d862 100644
+--- a/server/src/main/java/com/genymobile/scrcpy/wrappers/ActivityManager.java
++++ b/server/src/main/java/com/genymobile/scrcpy/wrappers/ActivityManager.java
+@@ -47,11 +47,11 @@ public final class ActivityManager {
+     private Method getGetContentProviderExternalMethod() throws NoSuchMethodException {
+         if (getContentProviderExternalMethod == null) {
+             try {
+-                getContentProviderExternalMethod = manager.getClass()
++                getContentProviderExternalMethod = ((Object) manager).getClass()
+                         .getMethod("getContentProviderExternal", String.class, int.class, IBinder.class, String.class);
+             } catch (NoSuchMethodException e) {
+                 // old version
+-                getContentProviderExternalMethod = manager.getClass().getMethod("getContentProviderExternal", String.class, int.class, IBinder.class);
++                getContentProviderExternalMethod = ((Object) manager).getClass().getMethod("getContentProviderExternal", String.class, int.class, IBinder.class);
+                 getContentProviderExternalMethodNewVersion = false;
+             }
+         }
+@@ -60,7 +60,7 @@ public final class ActivityManager {
+ 
+     private Method getRemoveContentProviderExternalMethod() throws NoSuchMethodException {
+         if (removeContentProviderExternalMethod == null) {
+-            removeContentProviderExternalMethod = manager.getClass().getMethod("removeContentProviderExternal", String.class, IBinder.class);
++            removeContentProviderExternalMethod = ((Object) manager).getClass().getMethod("removeContentProviderExternal", String.class, IBinder.class);
+         }
+         return removeContentProviderExternalMethod;
+     }
+@@ -114,7 +114,7 @@ public final class ActivityManager {
+         if (startActivityAsUserMethod == null) {
+             Class<?> iApplicationThreadClass = Class.forName("android.app.IApplicationThread");
+             Class<?> profilerInfo = Class.forName("android.app.ProfilerInfo");
+-            startActivityAsUserMethod = manager.getClass()
++            startActivityAsUserMethod = ((Object) manager).getClass()
+                     .getMethod("startActivityAsUser", iApplicationThreadClass, String.class, Intent.class, String.class, IBinder.class, String.class,
+                             int.class, int.class, profilerInfo, Bundle.class, int.class);
+         }
+@@ -150,7 +150,7 @@ public final class ActivityManager {
+ 
+     private Method getForceStopPackageMethod() throws NoSuchMethodException {
+         if (forceStopPackageMethod == null) {
+-            forceStopPackageMethod = manager.getClass().getMethod("forceStopPackage", String.class, int.class);
++            forceStopPackageMethod = ((Object) manager).getClass().getMethod("forceStopPackage", String.class, int.class);
+         }
+         return forceStopPackageMethod;
+     }
+@@ -169,7 +169,7 @@ public final class ActivityManager {
+             try {
+                 Class<?> iApplicationThreadClass = Class.forName("android.app.IApplicationThread");
+                 Class<?> iIntentReceiverClass = Class.forName("android.content.IIntentReceiver");
+-                broadcastIntentMethod = manager.getClass()
++                broadcastIntentMethod = ((Object) manager).getClass()
+                         .getMethod("broadcastIntent", iApplicationThreadClass, Intent.class, String.class, iIntentReceiverClass, int.class,
+                                 String.class, Bundle.class, String[].class, int.class, Bundle.class, boolean.class, boolean.class, int.class);
+             } catch (ClassNotFoundException e) {
+diff --git a/server/src/main/java/com/genymobile/scrcpy/wrappers/PowerManager.java b/server/src/main/java/com/genymobile/scrcpy/wrappers/PowerManager.java
+index c7ba3f17..8faa9a1e 100644
+--- a/server/src/main/java/com/genymobile/scrcpy/wrappers/PowerManager.java
++++ b/server/src/main/java/com/genymobile/scrcpy/wrappers/PowerManager.java
+@@ -29,9 +29,9 @@ public final class PowerManager {
+     private Method getIsScreenOnMethod() throws NoSuchMethodException {
+         if (isScreenOnMethod == null) {
+             if (Build.VERSION.SDK_INT >= AndroidVersions.API_34_ANDROID_14) {
+-                isScreenOnMethod = manager.getClass().getMethod("isDisplayInteractive", int.class);
++                isScreenOnMethod = ((Object) manager).getClass().getMethod("isDisplayInteractive", int.class);
+             } else {
+-                isScreenOnMethod = manager.getClass().getMethod("isInteractive");
++                isScreenOnMethod = ((Object) manager).getClass().getMethod("isInteractive");
+             }
+         }
+         return isScreenOnMethod;
+@@ -55,10 +55,10 @@ public final class PowerManager {
+         if (userActivityMethod == null) {
+             if (Build.VERSION.SDK_INT >= AndroidVersions.API_31_ANDROID_12) {
+                 // userActivity(int displayId, long time, int event, int flags);
+-                userActivityMethod = manager.getClass().getMethod("userActivity", int.class, long.class, int.class, int.class);
++                userActivityMethod = ((Object) manager).getClass().getMethod("userActivity", int.class, long.class, int.class, int.class);
+             } else {
+                 // userActivity(long time, int event, int flags);
+-                userActivityMethod = manager.getClass().getMethod("userActivity", long.class, int.class, int.class);
++                userActivityMethod = ((Object) manager).getClass().getMethod("userActivity", long.class, int.class, int.class);
+             }
+         }
+         return userActivityMethod;
+diff --git a/server/src/main/java/com/genymobile/scrcpy/wrappers/StatusBarManager.java b/server/src/main/java/com/genymobile/scrcpy/wrappers/StatusBarManager.java
+index ca80dde2..553737dd 100644
+--- a/server/src/main/java/com/genymobile/scrcpy/wrappers/StatusBarManager.java
++++ b/server/src/main/java/com/genymobile/scrcpy/wrappers/StatusBarManager.java
+@@ -27,10 +27,10 @@ public final class StatusBarManager {
+     private Method getExpandNotificationsPanelMethod() throws NoSuchMethodException {
+         if (expandNotificationsPanelMethod == null) {
+             try {
+-                expandNotificationsPanelMethod = manager.getClass().getMethod("expandNotificationsPanel");
++                expandNotificationsPanelMethod = ((Object) manager).getClass().getMethod("expandNotificationsPanel");
+             } catch (NoSuchMethodException e) {
+                 // Custom version for custom vendor ROM: <https://github.com/Genymobile/scrcpy/issues/2551>
+-                expandNotificationsPanelMethod = manager.getClass().getMethod("expandNotificationsPanel", int.class);
++                expandNotificationsPanelMethod = ((Object) manager).getClass().getMethod("expandNotificationsPanel", int.class);
+                 expandNotificationPanelMethodCustomVersion = true;
+             }
+         }
+@@ -41,10 +41,10 @@ public final class StatusBarManager {
+         if (expandSettingsPanelMethod == null) {
+             try {
+                 // Since Android 7: https://android.googlesource.com/platform/frameworks/base.git/+/a9927325eda025504d59bb6594fee8e240d95b01%5E%21/
+-                expandSettingsPanelMethod = manager.getClass().getMethod("expandSettingsPanel", String.class);
++                expandSettingsPanelMethod = ((Object) manager).getClass().getMethod("expandSettingsPanel", String.class);
+             } catch (NoSuchMethodException e) {
+                 // old version
+-                expandSettingsPanelMethod = manager.getClass().getMethod("expandSettingsPanel");
++                expandSettingsPanelMethod = ((Object) manager).getClass().getMethod("expandSettingsPanel");
+                 expandSettingsPanelMethodNewVersion = false;
+             }
+         }
+@@ -53,7 +53,7 @@ public final class StatusBarManager {
+ 
+     private Method getCollapsePanelsMethod() throws NoSuchMethodException {
+         if (collapsePanelsMethod == null) {
+-            collapsePanelsMethod = manager.getClass().getMethod("collapsePanels");
++            collapsePanelsMethod = ((Object) manager).getClass().getMethod("collapsePanels");
+         }
+         return collapsePanelsMethod;
+     }
+diff --git a/server/src/main/java/com/genymobile/scrcpy/wrappers/WindowManager.java b/server/src/main/java/com/genymobile/scrcpy/wrappers/WindowManager.java
+index 7ba5cc06..fd912af6 100644
+--- a/server/src/main/java/com/genymobile/scrcpy/wrappers/WindowManager.java
++++ b/server/src/main/java/com/genymobile/scrcpy/wrappers/WindowManager.java
+@@ -44,7 +44,7 @@ public final class WindowManager {
+ 
+     private Method getGetRotationMethod() throws NoSuchMethodException {
+         if (getRotationMethod == null) {
+-            Class<?> cls = manager.getClass();
++            Class<?> cls = ((Object) manager).getClass();
+             try {
+                 // method changed since this commit:
+                 // https://android.googlesource.com/platform/frameworks/base/+/8ee7285128c3843401d4c4d0412cd66e86ba49e3%5E%21/#F2
+@@ -62,16 +62,16 @@ public final class WindowManager {
+             try {
+                 // Android 15 preview and 14 QPR3 Beta added a String caller parameter for debugging:
+                 // <https://android.googlesource.com/platform/frameworks/base/+/670fb7f5c0d23cf51ead25538bcb017e03ed73ac%5E%21/>
+-                freezeDisplayRotationMethod = manager.getClass().getMethod("freezeDisplayRotation", int.class, int.class, String.class);
++                freezeDisplayRotationMethod = ((Object) manager).getClass().getMethod("freezeDisplayRotation", int.class, int.class, String.class);
+                 freezeDisplayRotationMethodVersion = 0;
+             } catch (NoSuchMethodException e) {
+                 try {
+                     // New method added by this commit:
+                     // <https://android.googlesource.com/platform/frameworks/base/+/90c9005e687aa0f63f1ac391adc1e8878ab31759%5E%21/>
+-                    freezeDisplayRotationMethod = manager.getClass().getMethod("freezeDisplayRotation", int.class, int.class);
++                    freezeDisplayRotationMethod = ((Object) manager).getClass().getMethod("freezeDisplayRotation", int.class, int.class);
+                     freezeDisplayRotationMethodVersion = 1;
+                 } catch (NoSuchMethodException e1) {
+-                    freezeDisplayRotationMethod = manager.getClass().getMethod("freezeRotation", int.class);
++                    freezeDisplayRotationMethod = ((Object) manager).getClass().getMethod("freezeRotation", int.class);
+                     freezeDisplayRotationMethodVersion = 2;
+                 }
+             }
+@@ -84,10 +84,10 @@ public final class WindowManager {
+             try {
+                 // New method added by this commit:
+                 // <https://android.googlesource.com/platform/frameworks/base/+/90c9005e687aa0f63f1ac391adc1e8878ab31759%5E%21/>
+-                isDisplayRotationFrozenMethod = manager.getClass().getMethod("isDisplayRotationFrozen", int.class);
++                isDisplayRotationFrozenMethod = ((Object) manager).getClass().getMethod("isDisplayRotationFrozen", int.class);
+                 isDisplayRotationFrozenMethodVersion = 0;
+             } catch (NoSuchMethodException e) {
+-                isDisplayRotationFrozenMethod = manager.getClass().getMethod("isRotationFrozen");
++                isDisplayRotationFrozenMethod = ((Object) manager).getClass().getMethod("isRotationFrozen");
+                 isDisplayRotationFrozenMethodVersion = 1;
+             }
+         }
+@@ -99,16 +99,16 @@ public final class WindowManager {
+             try {
+                 // Android 15 preview and 14 QPR3 Beta added a String caller parameter for debugging:
+                 // <https://android.googlesource.com/platform/frameworks/base/+/670fb7f5c0d23cf51ead25538bcb017e03ed73ac%5E%21/>
+-                thawDisplayRotationMethod = manager.getClass().getMethod("thawDisplayRotation", int.class, String.class);
++                thawDisplayRotationMethod = ((Object) manager).getClass().getMethod("thawDisplayRotation", int.class, String.class);
+                 thawDisplayRotationMethodVersion = 0;
+             } catch (NoSuchMethodException e) {
+                 try {
+                     // New method added by this commit:
+                     // <https://android.googlesource.com/platform/frameworks/base/+/90c9005e687aa0f63f1ac391adc1e8878ab31759%5E%21/>
+-                    thawDisplayRotationMethod = manager.getClass().getMethod("thawDisplayRotation", int.class);
++                    thawDisplayRotationMethod = ((Object) manager).getClass().getMethod("thawDisplayRotation", int.class);
+                     thawDisplayRotationMethodVersion = 1;
+                 } catch (NoSuchMethodException e1) {
+-                    thawDisplayRotationMethod = manager.getClass().getMethod("thawRotation");
++                    thawDisplayRotationMethod = ((Object) manager).getClass().getMethod("thawRotation");
+                     thawDisplayRotationMethodVersion = 2;
+                 }
+             }
+@@ -194,7 +194,7 @@ public final class WindowManager {
+     @TargetApi(AndroidVersions.API_30_ANDROID_11)
+     public int[] registerDisplayWindowListener(IDisplayWindowListener listener) {
+         try {
+-            return (int[]) manager.getClass().getMethod("registerDisplayWindowListener", IDisplayWindowListener.class).invoke(manager, listener);
++            return (int[]) ((Object) manager).getClass().getMethod("registerDisplayWindowListener", IDisplayWindowListener.class).invoke(manager, listener);
+         } catch (Exception e) {
+             Ln.e("Could not register display window listener", e);
+         }
+@@ -204,7 +204,7 @@ public final class WindowManager {
+     @TargetApi(AndroidVersions.API_30_ANDROID_11)
+     public void unregisterDisplayWindowListener(IDisplayWindowListener listener) {
+         try {
+-            manager.getClass().getMethod("unregisterDisplayWindowListener", IDisplayWindowListener.class).invoke(manager, listener);
++            ((Object) manager).getClass().getMethod("unregisterDisplayWindowListener", IDisplayWindowListener.class).invoke(manager, listener);
+         } catch (Exception e) {
+             Ln.e("Could not unregister display window listener", e);
+         }
+@@ -214,9 +214,9 @@ public final class WindowManager {
+     private Method getGetDisplayImePolicyMethod() throws NoSuchMethodException {
+         if (getDisplayImePolicyMethod == null) {
+             if (Build.VERSION.SDK_INT >= AndroidVersions.API_31_ANDROID_12) {
+-                getDisplayImePolicyMethod = manager.getClass().getMethod("getDisplayImePolicy", int.class);
++                getDisplayImePolicyMethod = ((Object) manager).getClass().getMethod("getDisplayImePolicy", int.class);
+             } else {
+-                getDisplayImePolicyMethod = manager.getClass().getMethod("shouldShowIme", int.class);
++                getDisplayImePolicyMethod = ((Object) manager).getClass().getMethod("shouldShowIme", int.class);
+             }
+         }
+         return getDisplayImePolicyMethod;
+@@ -241,9 +241,9 @@ public final class WindowManager {
+     private Method getSetDisplayImePolicyMethod() throws NoSuchMethodException {
+         if (setDisplayImePolicyMethod == null) {
+             if (Build.VERSION.SDK_INT >= AndroidVersions.API_31_ANDROID_12) {
+-                setDisplayImePolicyMethod = manager.getClass().getMethod("setDisplayImePolicy", int.class, int.class);
++                setDisplayImePolicyMethod = ((Object) manager).getClass().getMethod("setDisplayImePolicy", int.class, int.class);
+             } else {
+-                setDisplayImePolicyMethod = manager.getClass().getMethod("setShouldShowIme", int.class, boolean.class);
++                setDisplayImePolicyMethod = ((Object) manager).getClass().getMethod("setShouldShowIme", int.class, boolean.class);
+             }
+         }
+         return setDisplayImePolicyMethod;
+-- 
+2.54.0
+

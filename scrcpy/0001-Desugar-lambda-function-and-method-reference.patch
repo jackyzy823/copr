@@ -1,0 +1,1040 @@
+From c3d7ace261cd074284c600d173950832f03c1e3b Mon Sep 17 00:00:00 2001
+From: jackyzy823 <jackyzy823@gmail.com>
+Date: Wed, 9 Sep 2026 01:49:30 +0000
+Subject: [PATCH 1/3] Desugar lambda function and method reference.
+
+Why:
+
+We use dx to convert classes to dex.(Becasue d8 is too hard to build)
+
+Android don't support invoke-dynamic until API 26+,
+In d8, lambda function is desugared to annoymous class by classes bytecode translation before converted to dex (if min-sdk <= 26).
+and even with min-sdk 33, d8 will desugar it instead of invoke-dynamic due to no LambdaMetadataFactory in Android runtime.(see https://slack-chats.kotlinlang.org/t/8990438/as-a-android-developer-that-only-writes-kotlin-code-what-jvm#30c52ac9-070d-4bfe-baa1-85b3e3487a06 and https://jakewharton.com/androids-java-8-support/)
+
+However dx doesn't have this desugar ability.
+
+dx could translate lambda function to invoke-custom with
+--min-sdk-version=26, and the result bytecode:
+```invoke-custom {v1}, call_site_7("onTerminated",(Lcom/genymobile/scrcpy/Server$Completion;)Lcom/genymobile/scrcpy/AsyncProcessor$TerminationListener;,(Z)V,invoke-static@Lcom/genymobile/scrcpy/Server;->lambda$scrcpy$0(Lcom/genymobile/scrcpy/Server$Completion;Z)V,(Z)V)@Ljava/lang/invoke/LambdaMetafactory;->metafactory(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;```
+, but the required LambdaMetadataFactory isn't implemented in Android side.
+
+So error
+```
+[server] ERROR: Exception from call site #25 bootstrap method
+java.lang.BootstrapMethodError: Exception from call site #25 bootstrap method
+    at com.genymobile.scrcpy.Server.internalMain(Server. java:229)
+    at com.genymobile.scrcpy.Server.main(Server.java:215)
+    at com.android.internal.os.RuntimeInit.nativeFinishInit(Native Method)
+    at com.android.internal.os.RuntimeInit.main(RuntimeInit. java: 367)
+Caused by: java.lang.ClassCastException: Bootstrap method returned null
+    ... 4 more
+```
+will be returned.
+
+Ref:
+https://cs.android.com/android/platform/superproject/+/android-latest-release:libcore/ojluni/src/main/java/java/lang/invoke/LambdaMetafactory.java;l=330?q=lambdametafactory
+
+What we do:
+
+Manually desugar lambda functions and method references to annoymous classes.
+
+How to find which to modify:
+1. dx will complain about this if you don't specific
+   --min-sdk-version=26
+2. grep " -> " and "::"
+---
+ .../java/com/genymobile/scrcpy/CleanUp.java   |   7 +-
+ .../java/com/genymobile/scrcpy/Server.java    |  18 ++-
+ .../genymobile/scrcpy/audio/AudioEncoder.java |  76 ++++++----
+ .../scrcpy/audio/AudioRawRecorder.java        |  27 ++--
+ .../genymobile/scrcpy/control/Controller.java |  89 ++++++-----
+ .../scrcpy/control/DeviceMessageSender.java   |  17 ++-
+ .../scrcpy/control/UhidManager.java           |  35 +++--
+ .../scrcpy/display/DisplayMonitor.java        |  23 +--
+ .../display/DisplayResizeDebouncer.java       |   7 +-
+ .../com/genymobile/scrcpy/model/Size.java     |   7 +-
+ .../scrcpy/opengl/OpenGLRunner.java           |  50 +++---
+ .../com/genymobile/scrcpy/util/LogUtils.java  |  35 +++--
+ .../com/genymobile/scrcpy/util/Threads.java   |  17 ++-
+ .../scrcpy/video/CameraCapture.java           | 143 ++++++++++--------
+ .../scrcpy/video/NewDisplayCapture.java       |  32 ++--
+ .../scrcpy/video/ScreenCapture.java           |   7 +-
+ .../scrcpy/video/SurfaceEncoder.java          |  33 ++--
+ .../scrcpy/wrappers/DisplayManager.java       |  17 ++-
+ 18 files changed, 381 insertions(+), 259 deletions(-)
+
+diff --git a/server/src/main/java/com/genymobile/scrcpy/CleanUp.java b/server/src/main/java/com/genymobile/scrcpy/CleanUp.java
+index a5816c32..63cd1d91 100644
+--- a/server/src/main/java/com/genymobile/scrcpy/CleanUp.java
++++ b/server/src/main/java/com/genymobile/scrcpy/CleanUp.java
+@@ -31,7 +31,12 @@ public final class CleanUp {
+     private boolean interrupted;
+ 
+     private CleanUp(Options options) {
+-        thread = new Thread(() -> runCleanUp(options), "cleanup");
++        thread = new Thread(new Runnable() {
++            @Override
++            public void run() {
++                runCleanUp(options);
++            }
++        }, "cleanup");
+         thread.start();
+     }
+ 
+diff --git a/server/src/main/java/com/genymobile/scrcpy/Server.java b/server/src/main/java/com/genymobile/scrcpy/Server.java
+index d7d1a76b..184128a0 100644
+--- a/server/src/main/java/com/genymobile/scrcpy/Server.java
++++ b/server/src/main/java/com/genymobile/scrcpy/Server.java
+@@ -161,8 +161,11 @@ public final class Server {
+ 
+             Completion completion = new Completion(asyncProcessors.size());
+             for (AsyncProcessor asyncProcessor : asyncProcessors) {
+-                asyncProcessor.start((fatalError) -> {
+-                    completion.addCompleted(fatalError);
++                asyncProcessor.start(new AsyncProcessor.TerminationListener() {
++                    @Override
++                    public void onTerminated(boolean fatalError) {
++                        completion.addCompleted(fatalError);
++                    }
+                 });
+             }
+ 
+@@ -226,10 +229,13 @@ public final class Server {
+ 
+     private static void internalMain(String... args) throws Exception {
+         Thread.UncaughtExceptionHandler defaultHandler = Thread.getDefaultUncaughtExceptionHandler();
+-        Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
+-            Ln.e("Exception on thread " + t, e);
+-            if (defaultHandler != null) {
+-                defaultHandler.uncaughtException(t, e);
++        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
++            @Override
++            public void uncaughtException(Thread t, Throwable e) {
++                Ln.e("Exception on thread " + t, e);
++                if (defaultHandler != null) {
++                    defaultHandler.uncaughtException(t, e);
++                }
+             }
+         });
+ 
+diff --git a/server/src/main/java/com/genymobile/scrcpy/audio/AudioEncoder.java b/server/src/main/java/com/genymobile/scrcpy/audio/AudioEncoder.java
+index 1be21ebd..13b7edd0 100644
+--- a/server/src/main/java/com/genymobile/scrcpy/audio/AudioEncoder.java
++++ b/server/src/main/java/com/genymobile/scrcpy/audio/AudioEncoder.java
+@@ -152,21 +152,24 @@ public final class AudioEncoder implements AsyncProcessor {
+ 
+     @Override
+     public void start(TerminationListener listener) {
+-        thread = new Thread(() -> {
+-            boolean fatalError = false;
+-            try {
+-                encode();
+-            } catch (ConfigurationException e) {
+-                // Do not print stack trace, a user-friendly error-message has already been logged
+-                fatalError = true;
+-            } catch (AudioCaptureException e) {
+-                // Do not print stack trace, a user-friendly error-message has already been logged
+-            } catch (IOException e) {
+-                Ln.e("Audio encoding error", e);
+-                fatalError = true;
+-            } finally {
+-                Ln.d("Audio encoder stopped");
+-                listener.onTerminated(fatalError);
++        thread = new Thread(new Runnable() {
++            @Override
++            public void run() {
++                boolean fatalError = false;
++                try {
++                    encode();
++                } catch (ConfigurationException e) {
++                    // Do not print stack trace, a user-friendly error-message has already been logged
++                    fatalError = true;
++                } catch (AudioCaptureException e) {
++                    // Do not print stack trace, a user-friendly error-message has already been logged
++                } catch (IOException e) {
++                    Ln.e("Audio encoding error", e);
++                    fatalError = true;
++                } finally {
++                    Ln.d("Audio encoder stopped");
++                    listener.onTerminated(fatalError);
++                }
+             }
+         }, "audio-encoder");
+         thread.start();
+@@ -208,6 +211,7 @@ public final class AudioEncoder implements AsyncProcessor {
+             Ln.w("Audio disabled: it is not supported before Android 11");
+             streamer.writeDisableStream(false);
+             return;
++
+         }
+ 
+         MediaCodec mediaCodec = null;
+@@ -235,28 +239,34 @@ public final class AudioEncoder implements AsyncProcessor {
+             capture.start();
+ 
+             final MediaCodec mediaCodecRef = mediaCodec;
+-            inputThread = new Thread(() -> {
+-                try {
+-                    inputThread(mediaCodecRef, capture);
+-                } catch (IOException | InterruptedException e) {
+-                    Ln.e("Audio capture error", e);
+-                } finally {
+-                    end();
++            inputThread = new Thread(new Runnable() {
++                @Override
++                public void run() {
++                    try {
++                        inputThread(mediaCodecRef, capture);
++                    } catch (IOException | InterruptedException e) {
++                        Ln.e("Audio capture error", e);
++                    } finally {
++                        end();
++                    }
+                 }
+             }, "audio-in");
+ 
+-            outputThread = new Thread(() -> {
+-                try {
+-                    outputThread(mediaCodecRef);
+-                } catch (InterruptedException e) {
+-                    // this is expected on close
+-                } catch (IOException e) {
+-                    // Broken pipe is expected on close, because the socket is closed by the client
+-                    if (!IO.isBrokenPipe(e)) {
+-                        Ln.e("Audio encoding error", e);
++            outputThread = new Thread(new Runnable() {
++                @Override
++                public void run() {
++                    try {
++                        outputThread(mediaCodecRef);
++                    } catch (InterruptedException e) {
++                        // this is expected on close
++                    } catch (IOException e) {
++                        // Broken pipe is expected on close, because the socket is closed by the client
++                        if (!IO.isBrokenPipe(e)) {
++                            Ln.e("Audio encoding error", e);
++                        }
++                    } finally {
++                        end();
+                     }
+-                } finally {
+-                    end();
+                 }
+             }, "audio-out");
+ 
+diff --git a/server/src/main/java/com/genymobile/scrcpy/audio/AudioRawRecorder.java b/server/src/main/java/com/genymobile/scrcpy/audio/AudioRawRecorder.java
+index 9645bbbd..bd5f7812 100644
+--- a/server/src/main/java/com/genymobile/scrcpy/audio/AudioRawRecorder.java
++++ b/server/src/main/java/com/genymobile/scrcpy/audio/AudioRawRecorder.java
+@@ -66,18 +66,21 @@ public final class AudioRawRecorder implements AsyncProcessor {
+ 
+     @Override
+     public void start(TerminationListener listener) {
+-        thread = new Thread(() -> {
+-            boolean fatalError = false;
+-            try {
+-                record();
+-            } catch (AudioCaptureException e) {
+-                // Do not print stack trace, a user-friendly error-message has already been logged
+-            } catch (Throwable t) {
+-                Ln.e("Audio recording error", t);
+-                fatalError = true;
+-            } finally {
+-                Ln.d("Audio recorder stopped");
+-                listener.onTerminated(fatalError);
++        thread = new Thread(new Runnable() {
++            @Override
++            public void run() {
++                boolean fatalError = false;
++                try {
++                    record();
++                } catch (AudioCaptureException e) {
++                    // Do not print stack trace, a user-friendly error-message has already been logged
++                } catch (Throwable t) {
++                    Ln.e("Audio recording error", t);
++                    fatalError = true;
++                } finally {
++                    Ln.d("Audio recorder stopped");
++                    listener.onTerminated(fatalError);
++                }
+             }
+         }, "audio-raw");
+         thread.start();
+diff --git a/server/src/main/java/com/genymobile/scrcpy/control/Controller.java b/server/src/main/java/com/genymobile/scrcpy/control/Controller.java
+index 55d6e11b..18a132c6 100644
+--- a/server/src/main/java/com/genymobile/scrcpy/control/Controller.java
++++ b/server/src/main/java/com/genymobile/scrcpy/control/Controller.java
+@@ -146,15 +146,18 @@ public class Controller implements AsyncProcessor, VirtualDisplayListener {
+         if (clipboardAutosync) {
+             // If control and autosync are enabled, synchronize Android clipboard to the computer automatically
+             if (clipboardManager != null) {
+-                clipboardManager.addPrimaryClipChangedListener(() -> {
+-                    if (isSettingClipboard.get()) {
+-                        // This is a notification for the change we are currently applying, ignore it
+-                        return;
+-                    }
+-                    String text = Device.getClipboardText();
+-                    if (text != null) {
+-                        DeviceMessage msg = DeviceMessage.createClipboard(text);
+-                        sender.send(msg);
++                clipboardManager.addPrimaryClipChangedListener(new android.content.ClipboardManager.OnPrimaryClipChangedListener() {
++                    @Override
++                    public void onPrimaryClipChanged() {
++                        if (isSettingClipboard.get()) {
++                            // This is a notification for the change we are currently applying, ignore it
++                            return;
++                        }
++                        String text = Device.getClipboardText();
++                        if (text != null) {
++                            DeviceMessage msg = DeviceMessage.createClipboard(text);
++                            sender.send(msg);
++                        }
+                     }
+                 });
+             } else {
+@@ -248,21 +251,24 @@ public class Controller implements AsyncProcessor, VirtualDisplayListener {
+     }
+ 
+     private void startKeepActiveThread() {
+-        keepActiveThread = new Thread(() -> {
+-            try {
+-                while (true) {
+-                    Thread.sleep(KEEP_ACTIVE_INTERVAL_MS);
+-                    int actionDisplayId = getActionDisplayId();
+-                    if (actionDisplayId != Device.DISPLAY_ID_NONE) {
+-                        Device.keepActive(actionDisplayId);
++        keepActiveThread = new Thread(new Runnable() {
++            @Override
++            public void run() {
++                try {
++                    while (true) {
++                        Thread.sleep(KEEP_ACTIVE_INTERVAL_MS);
++                        int actionDisplayId = getActionDisplayId();
++                        if (actionDisplayId != Device.DISPLAY_ID_NONE) {
++                            Device.keepActive(actionDisplayId);
++                        }
+                     }
++                } catch (InterruptedException e) {
++                    // ignore
++                } catch (Throwable e) {
++                    Ln.e("Keep active error", e);
++                } finally {
++                    Ln.d("Keep active thread stopped");
+                 }
+-            } catch (InterruptedException e) {
+-                // ignore
+-            } catch (Throwable e) {
+-                Ln.e("Keep active error", e);
+-            } finally {
+-                Ln.d("Keep active thread stopped");
+             }
+         });
+         keepActiveThread.setName("keep-active");
+@@ -276,17 +282,20 @@ public class Controller implements AsyncProcessor, VirtualDisplayListener {
+             startKeepActiveThread();
+         }
+ 
+-        thread = new Thread(() -> {
+-            try {
+-                control();
+-            } catch (IOException e) {
+-                Ln.e("Controller error", e);
+-            } finally {
+-                Ln.d("Controller stopped");
+-                if (uhidManager != null) {
+-                    uhidManager.closeAll();
++        thread = new Thread(new Runnable() {
++            @Override
++            public void run() {
++                try {
++                    control();
++                } catch (IOException e) {
++                    Ln.e("Controller error", e);
++                } finally {
++                    Ln.d("Controller stopped");
++                    if (uhidManager != null) {
++                        uhidManager.closeAll();
++                    }
++                    listener.onTerminated(true);
+                 }
+-                listener.onTerminated(true);
+             }
+         }, "control-recv");
+         thread.start();
+@@ -649,9 +658,12 @@ public class Controller implements AsyncProcessor, VirtualDisplayListener {
+      * Schedule a call to set display power to off after a small delay.
+      */
+     private static void scheduleDisplayPowerOff(int displayId) {
+-        EXECUTOR.schedule(() -> {
+-            Ln.i("Forcing display off");
+-            Device.setDisplayPower(displayId, false);
++        EXECUTOR.schedule(new Runnable() {
++            @Override
++            public void run() {
++                Ln.i("Forcing display off");
++                Device.setDisplayPower(displayId, false);
++            }
+         }, 200, TimeUnit.MILLISECONDS);
+     }
+ 
+@@ -768,7 +780,12 @@ public class Controller implements AsyncProcessor, VirtualDisplayListener {
+         }
+ 
+         // Listing and selecting the app may take a lot of time
+-        startAppExecutor.submit(() -> startApp(name));
++        startAppExecutor.submit(new Runnable() {
++            @Override
++            public void run() {
++                startApp(name);
++            }
++        });
+     }
+ 
+     private void startApp(String name) {
+diff --git a/server/src/main/java/com/genymobile/scrcpy/control/DeviceMessageSender.java b/server/src/main/java/com/genymobile/scrcpy/control/DeviceMessageSender.java
+index dc5e6be0..e464d514 100644
+--- a/server/src/main/java/com/genymobile/scrcpy/control/DeviceMessageSender.java
++++ b/server/src/main/java/com/genymobile/scrcpy/control/DeviceMessageSender.java
+@@ -31,13 +31,16 @@ public final class DeviceMessageSender {
+     }
+ 
+     public void start() {
+-        thread = new Thread(() -> {
+-            try {
+-                loop();
+-            } catch (IOException | InterruptedException e) {
+-                // this is expected on close
+-            } finally {
+-                Ln.d("Device message sender stopped");
++        thread = new Thread(new Runnable() {
++            @Override
++            public void run() {
++                try {
++                    loop();
++                } catch (IOException | InterruptedException e) {
++                    // this is expected on close
++                } finally {
++                    Ln.d("Device message sender stopped");
++                }
+             }
+         }, "control-send");
+         thread.start();
+diff --git a/server/src/main/java/com/genymobile/scrcpy/control/UhidManager.java b/server/src/main/java/com/genymobile/scrcpy/control/UhidManager.java
+index 20532c0b..013cfbc1 100644
+--- a/server/src/main/java/com/genymobile/scrcpy/control/UhidManager.java
++++ b/server/src/main/java/com/genymobile/scrcpy/control/UhidManager.java
+@@ -87,26 +87,29 @@ public final class UhidManager {
+ 
+     private void registerUhidListener(int id, FileDescriptor fd) {
+         if (Build.VERSION.SDK_INT >= AndroidVersions.API_23_ANDROID_6_0) {
+-            queue.addOnFileDescriptorEventListener(fd, MessageQueue.OnFileDescriptorEventListener.EVENT_INPUT, (fd2, events) -> {
+-                try {
+-                    buffer.clear();
+-                    int r = Os.read(fd2, buffer);
+-                    buffer.flip();
+-                    if (r > 0) {
+-                        int type = buffer.getInt();
+-                        if (type == UHID_OUTPUT) {
+-                            byte[] data = extractHidOutputData(buffer);
+-                            if (data != null) {
+-                                DeviceMessage msg = DeviceMessage.createUhidOutput(id, data);
+-                                sender.send(msg);
++            queue.addOnFileDescriptorEventListener(fd, MessageQueue.OnFileDescriptorEventListener.EVENT_INPUT, new MessageQueue.OnFileDescriptorEventListener() {
++                @Override
++                public int onFileDescriptorEvents(FileDescriptor fd2, int events) {
++                    try {
++                        buffer.clear();
++                        int r = Os.read(fd2, buffer);
++                        buffer.flip();
++                        if (r > 0) {
++                            int type = buffer.getInt();
++                            if (type == UHID_OUTPUT) {
++                                byte[] data = extractHidOutputData(buffer);
++                                if (data != null) {
++                                    DeviceMessage msg = DeviceMessage.createUhidOutput(id, data);
++                                    sender.send(msg);
++                                }
+                             }
+                         }
++                    } catch (ErrnoException | InterruptedIOException e) {
++                        Ln.e("Failed to read UHID output", e);
++                        return 0;
+                     }
+-                } catch (ErrnoException | InterruptedIOException e) {
+-                    Ln.e("Failed to read UHID output", e);
+-                    return 0;
++                    return events;
+                 }
+-                return events;
+             });
+         }
+     }
+diff --git a/server/src/main/java/com/genymobile/scrcpy/display/DisplayMonitor.java b/server/src/main/java/com/genymobile/scrcpy/display/DisplayMonitor.java
+index f6d871c9..499fa059 100644
+--- a/server/src/main/java/com/genymobile/scrcpy/display/DisplayMonitor.java
++++ b/server/src/main/java/com/genymobile/scrcpy/display/DisplayMonitor.java
+@@ -48,17 +48,20 @@ public class DisplayMonitor {
+             handlerThread = new HandlerThread("DisplayListener");
+             handlerThread.start();
+             Handler handler = new Handler(handlerThread.getLooper());
+-            displayListenerHandle = ServiceManager.getDisplayManager().registerDisplayListener(eventDisplayId -> {
+-                if (Ln.isEnabled(Ln.Level.VERBOSE)) {
+-                    Ln.v("DisplayMonitor: onDisplayChanged(" + eventDisplayId + ")");
+-                }
++            displayListenerHandle = ServiceManager.getDisplayManager().registerDisplayListener(new DisplayManager.DisplayListener() {
++                @Override
++                public void onDisplayChanged(int eventDisplayId) {
++                    if (Ln.isEnabled(Ln.Level.VERBOSE)) {
++                        Ln.v("DisplayMonitor: onDisplayChanged(" + eventDisplayId + ")");
++                    }
+ 
+-                if (eventDisplayId == displayId) {
+-                    try {
+-                        checkDisplayPropertiesChanged();
+-                    } catch (Throwable e) {
+-                        Ln.e("DisplayMonitor error", e);
+-                        throw e;
++                    if (eventDisplayId == displayId) {
++                        try {
++                            checkDisplayPropertiesChanged();
++                        } catch (Throwable e) {
++                            Ln.e("DisplayMonitor error", e);
++                            throw e;
++                        }
+                     }
+                 }
+             }, handler);
+diff --git a/server/src/main/java/com/genymobile/scrcpy/display/DisplayResizeDebouncer.java b/server/src/main/java/com/genymobile/scrcpy/display/DisplayResizeDebouncer.java
+index 0b961c69..9d6c484a 100644
+--- a/server/src/main/java/com/genymobile/scrcpy/display/DisplayResizeDebouncer.java
++++ b/server/src/main/java/com/genymobile/scrcpy/display/DisplayResizeDebouncer.java
+@@ -25,7 +25,12 @@ public final class DisplayResizeDebouncer {
+ 
+     public void start() {
+         assert thread == null;
+-        thread = new Thread(this::debounce);
++        thread = new Thread(new Runnable() {
++            @Override
++            public void run() {
++                debounce();
++            }
++        });
+         thread.setName("debouncer");
+         thread.setDaemon(true);
+         thread.start();
+diff --git a/server/src/main/java/com/genymobile/scrcpy/model/Size.java b/server/src/main/java/com/genymobile/scrcpy/model/Size.java
+index 51211969..b064e725 100644
+--- a/server/src/main/java/com/genymobile/scrcpy/model/Size.java
++++ b/server/src/main/java/com/genymobile/scrcpy/model/Size.java
+@@ -94,12 +94,15 @@ public final class Size {
+         int maxBlock = maxMajor / alignment;
+ 
+         int bestBlock = BinarySearch.findHighestTrue(
+-                minBlock, maxBlock, block -> {
++            minBlock, maxBlock, new java.util.function.Predicate<Integer>() {
++                @Override
++                public boolean test(Integer block) {
+                     int pixels = block * alignment;
+                     int w = align(width * pixels / major, alignment);
+                     int h = align(height * pixels / major, alignment);
+                     return caps.isSizeSupported(w, h);
+-                });
++                }
++            });
+ 
+         if (bestBlock < minBlock) {
+             Ln.d("No matching size found, ignore encoder size validation");
+diff --git a/server/src/main/java/com/genymobile/scrcpy/opengl/OpenGLRunner.java b/server/src/main/java/com/genymobile/scrcpy/opengl/OpenGLRunner.java
+index 232f68d1..f4f1427c 100644
+--- a/server/src/main/java/com/genymobile/scrcpy/opengl/OpenGLRunner.java
++++ b/server/src/main/java/com/genymobile/scrcpy/opengl/OpenGLRunner.java
+@@ -167,13 +167,16 @@ public final class OpenGLRunner {
+ 
+         filter.init();
+ 
+-        surfaceTexture.setOnFrameAvailableListener(surfaceTexture -> {
+-            if (stopped) {
+-                // Make sure to never render after resources have been released
+-                return;
+-            }
++        surfaceTexture.setOnFrameAvailableListener(new SurfaceTexture.OnFrameAvailableListener() {
++            @Override
++            public void onFrameAvailable(SurfaceTexture surfaceTexture) {
++                if (stopped) {
++                    // Make sure to never render after resources have been released
++                    return;
++                }
+ 
+-            render(outputSize);
++                render(outputSize);
++            }
+         }, handler);
+     }
+ 
+@@ -200,26 +203,29 @@ public final class OpenGLRunner {
+     public void stopAndRelease() {
+         final Semaphore sem = new Semaphore(0);
+ 
+-        handler.post(() -> {
+-            stopped = true;
+-            surfaceTexture.setOnFrameAvailableListener(null, handler);
++        handler.post(new Runnable() {
++            @Override
++            public void run(){
++                stopped = true;
++                surfaceTexture.setOnFrameAvailableListener(null, handler);
+ 
+-            filter.release();
++                filter.release();
+ 
+-            int[] textures = {textureId};
+-            GLES20.glDeleteTextures(1, textures, 0);
+-            GLUtils.checkGlError();
++                int[] textures = {textureId};
++                GLES20.glDeleteTextures(1, textures, 0);
++                GLUtils.checkGlError();
+ 
+-            EGL14.eglDestroySurface(eglDisplay, eglSurface);
+-            EGL14.eglDestroyContext(eglDisplay, eglContext);
+-            EGL14.eglTerminate(eglDisplay);
+-            eglDisplay = EGL14.EGL_NO_DISPLAY;
+-            eglContext = EGL14.EGL_NO_CONTEXT;
+-            eglSurface = EGL14.EGL_NO_SURFACE;
+-            surfaceTexture.release();
+-            inputSurface.release();
++                EGL14.eglDestroySurface(eglDisplay, eglSurface);
++                EGL14.eglDestroyContext(eglDisplay, eglContext);
++                EGL14.eglTerminate(eglDisplay);
++                eglDisplay = EGL14.EGL_NO_DISPLAY;
++                eglContext = EGL14.EGL_NO_CONTEXT;
++                eglSurface = EGL14.EGL_NO_SURFACE;
++                surfaceTexture.release();
++                inputSurface.release();
+ 
+-            sem.release();
++                sem.release();
++            }
+         });
+ 
+         try {
+diff --git a/server/src/main/java/com/genymobile/scrcpy/util/LogUtils.java b/server/src/main/java/com/genymobile/scrcpy/util/LogUtils.java
+index 4f4605ea..cbec7f5a 100644
+--- a/server/src/main/java/com/genymobile/scrcpy/util/LogUtils.java
++++ b/server/src/main/java/com/genymobile/scrcpy/util/LogUtils.java
+@@ -259,19 +259,32 @@ public final class LogUtils {
+         //  2. name
+         //  3. package name
+         // Comparator.comparing() was introduced in API 24, so it cannot be used here to simplify the code
+-        Collections.sort(apps, (thisApp, otherApp) -> {
+-            // System apps first
+-            int cmp = -Boolean.compare(thisApp.isSystem(), otherApp.isSystem());
+-            if (cmp != 0) {
+-                return cmp;
+-            }
++        Collections.sort(apps, new java.util.Comparator<DeviceApp>() {
++            @Override
++            public int compare(DeviceApp thisApp, DeviceApp otherApp) {
++                // System apps first
++                int cmp = -Boolean.compare(thisApp.isSystem(), otherApp.isSystem());
++                if (cmp != 0) {
++                    return cmp;
++                }
+ 
+-            cmp = Objects.compare(thisApp.getName(), otherApp.getName(), String::compareTo);
+-            if (cmp != 0) {
+-                return cmp;
+-            }
++                cmp = Objects.compare(thisApp.getName(), otherApp.getName(), new java.util.Comparator<String>() {
++                    @Override
++                    public int compare(String s1, String s2) {
++                        return s1.compareTo(s2);
++                    }
++                });
++                if (cmp != 0) {
++                    return cmp;
++                }
+ 
+-            return Objects.compare(thisApp.getPackageName(), otherApp.getPackageName(), String::compareTo);
++                return Objects.compare(thisApp.getPackageName(), otherApp.getPackageName(), new java.util.Comparator<String>() {
++                    @Override
++                    public int compare(String s1, String s2) {
++                        return s1.compareTo(s2);
++                    }
++                });
++            }
+         });
+ 
+         final int column = 30;
+diff --git a/server/src/main/java/com/genymobile/scrcpy/util/Threads.java b/server/src/main/java/com/genymobile/scrcpy/util/Threads.java
+index c561d1ef..b04b7d51 100644
+--- a/server/src/main/java/com/genymobile/scrcpy/util/Threads.java
++++ b/server/src/main/java/com/genymobile/scrcpy/util/Threads.java
+@@ -17,13 +17,16 @@ public final class Threads {
+         T[] resultRef = (T[]) new Object[1];
+         Throwable[] throwableRef = new Throwable[1];
+ 
+-        handler.post(() -> {
+-            try {
+-                resultRef[0] = callable.call();
+-            } catch (Throwable throwable) {
+-                throwableRef[0] = throwable;
+-            } finally {
+-                sem.release();
++        handler.post(new Runnable() {
++            @Override
++            public void run() {
++                try {
++                    resultRef[0] = callable.call();
++                } catch (Throwable throwable) {
++                    throwableRef[0] = throwable;
++                } finally {
++                    sem.release();
++                }
+             }
+         });
+ 
+diff --git a/server/src/main/java/com/genymobile/scrcpy/video/CameraCapture.java b/server/src/main/java/com/genymobile/scrcpy/video/CameraCapture.java
+index 1aaeafa5..fb06105f 100644
+--- a/server/src/main/java/com/genymobile/scrcpy/video/CameraCapture.java
++++ b/server/src/main/java/com/genymobile/scrcpy/video/CameraCapture.java
+@@ -209,45 +209,56 @@ public class CameraCapture extends SurfaceCapture {
+ 
+         Stream<android.util.Size> stream = Arrays.stream(sizes);
+         if (maxSize > 0) {
+-            stream = stream.filter(it -> it.getWidth() <= maxSize && it.getHeight() <= maxSize);
++            stream = stream.filter(new java.util.function.Predicate<android.util.Size>() {
++                @Override
++                public boolean test(android.util.Size it) {
++                    return it.getWidth() <= maxSize && it.getHeight() <= maxSize;
++                }
++            });
+         }
+ 
+         Float targetAspectRatio = resolveAspectRatio(aspectRatio, characteristics);
+         if (targetAspectRatio != null) {
+-            stream = stream.filter(it -> {
+-                float ar = ((float) it.getWidth() / it.getHeight());
+-                float arRatio = ar / targetAspectRatio;
+-                // Accept if the aspect ratio is the target aspect ratio + or - 10%
+-                return arRatio >= 0.9f && arRatio <= 1.1f;
++            stream = stream.filter(new java.util.function.Predicate<android.util.Size>() {
++                @Override
++                public boolean test(android.util.Size it) {
++                    float ar = ((float) it.getWidth() / it.getHeight());
++                    float arRatio = ar / targetAspectRatio;
++                    // Accept if the aspect ratio is the target aspect ratio + or - 10%
++                    return arRatio >= 0.9f && arRatio <= 1.1f;
++                }
+             });
+         }
+ 
+-        Optional<android.util.Size> selected = stream.max((s1, s2) -> {
+-            // Greater width is better
+-            int cmp = Integer.compare(s1.getWidth(), s2.getWidth());
+-            if (cmp != 0) {
+-                return cmp;
+-            }
++        Optional<android.util.Size> selected = stream.max(new java.util.Comparator<android.util.Size>() {
++            @Override
++            public int compare(android.util.Size s1, android.util.Size s2) {
++                // Greater width is better
++                int cmp = Integer.compare(s1.getWidth(), s2.getWidth());
++                if (cmp != 0) {
++                    return cmp;
++                }
+ 
+-            if (targetAspectRatio != null) {
+-                // Closer to the target aspect ratio is better
+-                float ar1 = ((float) s1.getWidth() / s1.getHeight());
+-                float arRatio1 = ar1 / targetAspectRatio;
+-                float distance1 = Math.abs(1 - arRatio1);
++                if (targetAspectRatio != null) {
++                    // Closer to the target aspect ratio is better
++                    float ar1 = ((float) s1.getWidth() / s1.getHeight());
++                    float arRatio1 = ar1 / targetAspectRatio;
++                    float distance1 = Math.abs(1 - arRatio1);
+ 
+-                float ar2 = ((float) s2.getWidth() / s2.getHeight());
+-                float arRatio2 = ar2 / targetAspectRatio;
+-                float distance2 = Math.abs(1 - arRatio2);
++                    float ar2 = ((float) s2.getWidth() / s2.getHeight());
++                    float arRatio2 = ar2 / targetAspectRatio;
++                    float distance2 = Math.abs(1 - arRatio2);
+ 
+-                // Reverse the order because lower distance is better
+-                cmp = Float.compare(distance2, distance1);
+-                if (cmp != 0) {
+-                    return cmp;
++                    // Reverse the order because lower distance is better
++                    cmp = Float.compare(distance2, distance1);
++                    if (cmp != 0) {
++                        return cmp;
++                    }
+                 }
+-            }
+ 
+-            // Greater height is better
+-            return Integer.compare(s1.getHeight(), s2.getHeight());
++                // Greater height is better
++                return Integer.compare(s1.getHeight(), s2.getHeight());
++            }
+         });
+ 
+         if (selected.isPresent()) {
+@@ -284,9 +295,12 @@ public class CameraCapture extends SurfaceCapture {
+             surface = glRunner.start(captureSize, videoSize, surface);
+         }
+ 
+-        cameraHandler.post(() -> {
+-            assertCameraThread();
+-            started = true;
++        cameraHandler.post(new Runnable() {
++            @Override
++            public void run() {
++                assertCameraThread();
++                started = true;
++            }
+         });
+ 
+         Surface captureSurface = surface;
+@@ -355,11 +369,14 @@ public class CameraCapture extends SurfaceCapture {
+ 
+     @Override
+     public void stop() {
+-        cameraHandler.post(() -> {
+-            assertCameraThread();
+-            currentSession = null;
+-            requestBuilder = null;
+-            started = false;
++        cameraHandler.post(new Runnable() {
++            @Override
++            public void run() {
++                assertCameraThread();
++                currentSession = null;
++                requestBuilder = null;
++                started = false;
++            }
+         });
+ 
+         if (glRunner != null) {
+@@ -470,16 +487,19 @@ public class CameraCapture extends SurfaceCapture {
+     }
+ 
+     public void setTorchEnabled(boolean enabled) {
+-        cameraHandler.post(() -> {
+-            assertCameraThread();
+-            if (currentSession != null && requestBuilder != null) {
+-                try {
+-                    Ln.i("Turn camera torch " + (enabled ? "on" : "off"));
+-                    requestBuilder.set(CaptureRequest.FLASH_MODE, enabled ? CaptureRequest.FLASH_MODE_TORCH : CaptureRequest.FLASH_MODE_OFF);
+-                    CaptureRequest request = requestBuilder.build();
+-                    setRepeatingRequest(currentSession, request);
+-                } catch (CameraAccessException e) {
+-                    Ln.e("Camera error", e);
++        cameraHandler.post(new Runnable() {
++            @Override
++            public void run() {
++                assertCameraThread();
++                if (currentSession != null && requestBuilder != null) {
++                    try {
++                        Ln.i("Turn camera torch " + (enabled ? "on" : "off"));
++                        requestBuilder.set(CaptureRequest.FLASH_MODE, enabled ? CaptureRequest.FLASH_MODE_TORCH : CaptureRequest.FLASH_MODE_OFF);
++                        CaptureRequest request = requestBuilder.build();
++                        setRepeatingRequest(currentSession, request);
++                    } catch (CameraAccessException e) {
++                        Ln.e("Camera error", e);
++                    }
+                 }
+             }
+         });
+@@ -487,22 +507,25 @@ public class CameraCapture extends SurfaceCapture {
+ 
+     @TargetApi(AndroidVersions.API_30_ANDROID_11)
+     private void zoom(boolean in) {
+-        cameraHandler.post(() -> {
+-            assertCameraThread();
+-            if (currentSession != null && requestBuilder != null) {
+-                // Always align to log values
+-                double z = Math.round(Math.log(zoom) / Math.log(ZOOM_FACTOR));
+-                double dir = in ? 1 : -1;
+-                zoom = (float) Math.pow(ZOOM_FACTOR, z + dir);
++        cameraHandler.post(new Runnable() {
++            @Override
++            public void run() {
++                assertCameraThread();
++                if (currentSession != null && requestBuilder != null) {
++                    // Always align to log values
++                    double z = Math.round(Math.log(zoom) / Math.log(ZOOM_FACTOR));
++                    double dir = in ? 1 : -1;
++                    zoom = (float) Math.pow(ZOOM_FACTOR, z + dir);
+ 
+-                try {
+-                    zoom = clampZoom(zoom);
+-                    Ln.i("Set camera zoom: " + zoom);
+-                    requestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, zoom);
+-                    CaptureRequest request = requestBuilder.build();
+-                    setRepeatingRequest(currentSession, request);
+-                } catch (CameraAccessException e) {
+-                    Ln.e("Camera error", e);
++                    try {
++                        zoom = clampZoom(zoom);
++                        Ln.i("Set camera zoom: " + zoom);
++                        requestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, zoom);
++                        CaptureRequest request = requestBuilder.build();
++                        setRepeatingRequest(currentSession, request);
++                    } catch (CameraAccessException e) {
++                        Ln.e("Camera error", e);
++                    }
+                 }
+             }
+         });
+diff --git a/server/src/main/java/com/genymobile/scrcpy/video/NewDisplayCapture.java b/server/src/main/java/com/genymobile/scrcpy/video/NewDisplayCapture.java
+index 5ed4c732..3161b895 100644
+--- a/server/src/main/java/com/genymobile/scrcpy/video/NewDisplayCapture.java
++++ b/server/src/main/java/com/genymobile/scrcpy/video/NewDisplayCapture.java
+@@ -102,7 +102,12 @@ public class NewDisplayCapture extends SurfaceCapture {
+             }
+ 
+             tracker = new DisplayPropertiesTracker();
+-            debouncer = new DisplayResizeDebouncer(this::triggerResize);
++            debouncer = new DisplayResizeDebouncer(new DisplayResizeDebouncer.Callback() {
++                @Override
++                public void trigger(Size size) {
++                    triggerResize(size);
++                }
++            });
+             debouncer.start();
+ 
+             // Hardcode default values if not defined
+@@ -241,21 +246,24 @@ public class NewDisplayCapture extends SurfaceCapture {
+                 ServiceManager.getWindowManager().setDisplayImePolicy(virtualDisplayId, displayImePolicy);
+             }
+ 
+-            displayMonitor.start(virtualDisplayId, (props) -> {
+-                int reason;
+-                if (flexDisplay) {
+-                    boolean isClientResize = tracker.onChanged(props);
+-                    if (isClientResize) {
+-                        reason = CaptureControl.RESET_REASON_CLIENT_RESIZED;
++            displayMonitor.start(virtualDisplayId, new DisplayMonitor.Listener() {
++                @Override
++                public void onDisplayPropertiesChanged(DisplayProperties props) {
++                    int reason;
++                    if (flexDisplay) {
++                        boolean isClientResize = tracker.onChanged(props);
++                        if (isClientResize) {
++                            reason = CaptureControl.RESET_REASON_CLIENT_RESIZED;
++                        } else {
++                            reason = CaptureControl.RESET_REASON_DISPLAY_PROPERTIES_CHANGED;
++                            // Display properties have changed, cancel pending client resize requests
++                            debouncer.cancelResize();
++                        }
+                     } else {
+                         reason = CaptureControl.RESET_REASON_DISPLAY_PROPERTIES_CHANGED;
+-                        // Display properties have changed, cancel pending client resize requests
+-                        debouncer.cancelResize();
+                     }
+-                } else {
+-                    reason = CaptureControl.RESET_REASON_DISPLAY_PROPERTIES_CHANGED;
++                    getCaptureControl().reset(reason);
+                 }
+-                getCaptureControl().reset(reason);
+             });
+         } catch (Exception e) {
+             Ln.e("Could not create display", e);
+diff --git a/server/src/main/java/com/genymobile/scrcpy/video/ScreenCapture.java b/server/src/main/java/com/genymobile/scrcpy/video/ScreenCapture.java
+index 0768181a..25a7069f 100644
+--- a/server/src/main/java/com/genymobile/scrcpy/video/ScreenCapture.java
++++ b/server/src/main/java/com/genymobile/scrcpy/video/ScreenCapture.java
+@@ -65,7 +65,12 @@ public class ScreenCapture extends SurfaceCapture {
+     @Override
+     public void init(VideoConstraints videoConstraints) {
+         this.videoConstraints = videoConstraints;
+-        displayMonitor.start(displayId, (props) -> getCaptureControl().reset(CaptureControl.RESET_REASON_DISPLAY_PROPERTIES_CHANGED));
++        displayMonitor.start(displayId, new DisplayMonitor.Listener() {
++            @Override
++            public void onDisplayPropertiesChanged(DisplayProperties props) {
++                getCaptureControl().reset(CaptureControl.RESET_REASON_DISPLAY_PROPERTIES_CHANGED);
++            }
++        });
+     }
+ 
+     @Override
+diff --git a/server/src/main/java/com/genymobile/scrcpy/video/SurfaceEncoder.java b/server/src/main/java/com/genymobile/scrcpy/video/SurfaceEncoder.java
+index 539681b4..d47f834f 100644
+--- a/server/src/main/java/com/genymobile/scrcpy/video/SurfaceEncoder.java
++++ b/server/src/main/java/com/genymobile/scrcpy/video/SurfaceEncoder.java
+@@ -349,23 +349,26 @@ public class SurfaceEncoder implements AsyncProcessor {
+ 
+     @Override
+     public void start(TerminationListener listener) {
+-        thread = new Thread(() -> {
+-            // Some devices (Meizu) deadlock if the video encoding thread has no Looper
+-            // <https://github.com/Genymobile/scrcpy/issues/4143>
+-            Looper.prepare();
++        thread = new Thread(new Runnable() {
++            @Override
++            public void run() {
++                // Some devices (Meizu) deadlock if the video encoding thread has no Looper
++                // <https://github.com/Genymobile/scrcpy/issues/4143>
++                Looper.prepare();
+ 
+-            try {
+-                streamCapture();
+-            } catch (ConfigurationException e) {
+-                // Do not print stack trace, a user-friendly error-message has already been logged
+-            } catch (IOException e) {
+-                // Broken pipe is expected on close, because the socket is closed by the client
+-                if (!IO.isBrokenPipe(e)) {
+-                    Ln.e("Video encoding error", e);
++                try {
++                    streamCapture();
++                } catch (ConfigurationException e) {
++                    // Do not print stack trace, a user-friendly error-message has already been logged
++                } catch (IOException e) {
++                    // Broken pipe is expected on close, because the socket is closed by the client
++                    if (!IO.isBrokenPipe(e)) {
++                        Ln.e("Video encoding error", e);
++                    }
++                } finally {
++                    Ln.d("Screen streaming stopped");
++                    listener.onTerminated(true);
+                 }
+-            } finally {
+-                Ln.d("Screen streaming stopped");
+-                listener.onTerminated(true);
+             }
+         }, "video");
+         thread.start();
+diff --git a/server/src/main/java/com/genymobile/scrcpy/wrappers/DisplayManager.java b/server/src/main/java/com/genymobile/scrcpy/wrappers/DisplayManager.java
+index 1be04c3a..cefb3d75 100644
+--- a/server/src/main/java/com/genymobile/scrcpy/wrappers/DisplayManager.java
++++ b/server/src/main/java/com/genymobile/scrcpy/wrappers/DisplayManager.java
+@@ -205,14 +205,17 @@ public final class DisplayManager {
+             Object displayListenerProxy = Proxy.newProxyInstance(
+                     ClassLoader.getSystemClassLoader(),
+                     new Class[] {displayListenerClass},
+-                    (proxy, method, args) -> {
+-                        if ("onDisplayChanged".equals(method.getName())) {
+-                            listener.onDisplayChanged((int) args[0]);
++                    new java.lang.reflect.InvocationHandler() {
++                        @Override
++                        public Object invoke(Object proxy, java.lang.reflect.Method method, Object[] args) throws Throwable {
++                            if ("onDisplayChanged".equals(method.getName())) {
++                                listener.onDisplayChanged((int) args[0]);
++                            }
++                            if ("toString".equals(method.getName())) {
++                                return "DisplayListener";
++                            }
++                            return null;
+                         }
+-                        if ("toString".equals(method.getName())) {
+-                            return "DisplayListener";
+-                        }
+-                        return null;
+                     });
+             try {
+                 manager.getClass()
+-- 
+2.54.0
+

@@ -1,0 +1,113 @@
+From 7003a46fa7e80939f2087e2e9a96c5ec40960521 Mon Sep 17 00:00:00 2001
+From: jackyzy823 <jackyzy823@gmail.com>
+Date: Wed, 9 Sep 2026 02:21:54 +0000
+Subject: [PATCH 2/3] Optionally Desugar static methods in interface
+
+Why
+
+dx requires min-sdk>=24 to support default methods in
+interface.otherwise convertion would be failed.
+
+```
+WARNING in com.genymobile.scrcpy.model.Codec.getMimeType:(Landroid/media/MediaCodec;)Ljava/lang/String;: defining a static interface method requires --min-sdk-version >= 24 (currently 13) for interface methods: com.genymobile.scrcpy.model.Codec.getMimeType:(Landroid/media/MediaCodec;)Ljava/lang/String;
+Uncaught translation error: com.android.dx.cf.code.SimException: ERROR in com.genymobile.scrcpy.audio.AudioEncoder.createMediaCodec:(Lcom/genymobile/scrcpy/model/Codec;Ljava/lang/String;)Landroid/media/MediaCodec;: invoking a static interface method com.genymobile.scrcpy.model.Codec.getMimeType:(Landroid/media/MediaCodec;)Ljava/lang/String; strictly requires --min-sdk-version >= 24 (blocked at current API level 13)
+Uncaught translation error: com.android.dx.cf.code.SimException: ERROR in com.genymobile.scrcpy.video.SurfaceEncoder.createMediaCodec:(Lcom/genymobile/scrcpy/model/Codec;Ljava/lang/String;)Landroid/media/MediaCodec;: invoking a static interface method com.genymobile.scrcpy.model.Codec.getMimeType:(Landroid/media/MediaCodec;)Ljava/lang/String; strictly requires --min-sdk-version >= 24 (blocked at current API level 13)
+```
+
+If you call dx with --min-sdk-version >= 24, on device (sdk<24) it will show unknown dex version (dex version
+updated form sdk>=24).
+
+```
+W art     : Failed to open dex file '/data/local/tmp/scrcpy-server.jar' from memory: Unrecognized version number in /data/local/tmp/scrcpy-server.jar: 0 3 7
+E appproc : ERROR: could not find class 'com.genymobile.scrcpy.Server'
+```
+
+To support the same version range as upstream build and README
+(minsdk>=21),we must remove static methods in interface.
+
+d8 desugar default interface methods to companion classes
+
+What we do
+
+manullay create nested class in interface which contains default
+methods and rewrite all call to the default methods.
+
+How to find which to fix
+1. see dx complains
+2. find `static` keyword in interfaces
+
+Alternative way:
+
+Use dx --allow-all-interface-method-invokes and --min-sdk-version=21 is ok, it will just show warning, but allow to convert.
+(and runtime is ok, tested on an Android 6.0.1 device)
+Although it is experimental in dx
+```
+// Experimentally invoke-static of static interface methods
+// breaks on VMs running below API level 21. Invocations of
+// default interface methods may soft-fail verification but so
+// long as they are not called that's okay.
+```
+So it might be safe to use since we have min sdk >=21
+
+https://android.googlesource.com/platform/dalvik/+/refs/heads/main/dx/src/com/android/dx/cf/code/Simulator.java#884
+---
+ .../java/com/genymobile/scrcpy/audio/AudioEncoder.java   | 2 +-
+ .../src/main/java/com/genymobile/scrcpy/model/Codec.java | 9 ++++++---
+ .../java/com/genymobile/scrcpy/video/SurfaceEncoder.java | 2 +-
+ 3 files changed, 8 insertions(+), 5 deletions(-)
+
+diff --git a/server/src/main/java/com/genymobile/scrcpy/audio/AudioEncoder.java b/server/src/main/java/com/genymobile/scrcpy/audio/AudioEncoder.java
+index 13b7edd0..6d90d3c4 100644
+--- a/server/src/main/java/com/genymobile/scrcpy/audio/AudioEncoder.java
++++ b/server/src/main/java/com/genymobile/scrcpy/audio/AudioEncoder.java
+@@ -331,7 +331,7 @@ public final class AudioEncoder implements AsyncProcessor {
+             Ln.d("Creating audio encoder by name: '" + encoderName + "'");
+             try {
+                 MediaCodec mediaCodec = MediaCodec.createByCodecName(encoderName);
+-                String mimeType = Codec.getMimeType(mediaCodec);
++                String mimeType = Codec.CC.getMimeType(mediaCodec);
+                 if (!codec.getMimeType().equals(mimeType)) {
+                     Ln.e("Audio encoder type for \"" + encoderName + "\" (" + mimeType + ") does not match codec type (" + codec.getMimeType() + ")");
+                     throw new ConfigurationException("Incorrect encoder type: " + encoderName);
+diff --git a/server/src/main/java/com/genymobile/scrcpy/model/Codec.java b/server/src/main/java/com/genymobile/scrcpy/model/Codec.java
+index b1117102..77c857a2 100644
+--- a/server/src/main/java/com/genymobile/scrcpy/model/Codec.java
++++ b/server/src/main/java/com/genymobile/scrcpy/model/Codec.java
+@@ -1,6 +1,7 @@
+ package com.genymobile.scrcpy.model;
+ 
+ import android.media.MediaCodec;
++import com.genymobile.scrcpy.util.Ln;
+ 
+ public interface Codec {
+ 
+@@ -17,8 +18,10 @@ public interface Codec {
+ 
+     String getMimeType();
+ 
+-    static String getMimeType(MediaCodec codec) {
+-        String[] types = codec.getCodecInfo().getSupportedTypes();
+-        return types.length > 0 ? types[0] : null;
++    public final class CC {
++        public static String getMimeType(MediaCodec codec) {
++            String[] types = codec.getCodecInfo().getSupportedTypes();
++            return types.length > 0 ? types[0] : null;
++        }
+     }
+ }
+diff --git a/server/src/main/java/com/genymobile/scrcpy/video/SurfaceEncoder.java b/server/src/main/java/com/genymobile/scrcpy/video/SurfaceEncoder.java
+index d47f834f..1b55db37 100644
+--- a/server/src/main/java/com/genymobile/scrcpy/video/SurfaceEncoder.java
++++ b/server/src/main/java/com/genymobile/scrcpy/video/SurfaceEncoder.java
+@@ -282,7 +282,7 @@ public class SurfaceEncoder implements AsyncProcessor {
+             Ln.d("Creating encoder by name: '" + encoderName + "'");
+             try {
+                 MediaCodec mediaCodec = MediaCodec.createByCodecName(encoderName);
+-                String mimeType = Codec.getMimeType(mediaCodec);
++                String mimeType = Codec.CC.getMimeType(mediaCodec);
+                 if (!codec.getMimeType().equals(mimeType)) {
+                     Ln.e("Video encoder type for \"" + encoderName + "\" (" + mimeType + ") does not match codec type (" + codec.getMimeType() + ")");
+                     throw new ConfigurationException("Incorrect encoder type: " + encoderName);
+-- 
+2.54.0
+
