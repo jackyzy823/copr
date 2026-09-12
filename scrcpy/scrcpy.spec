@@ -11,6 +11,7 @@ License:        ASL 2.0 AND Apache-2.0
 URL:            %{forgeurl}
 Source0:        %{forgesource}
 
+# Patch generated from https://github.com/jackyzy823/scrcpy/tree/v4.1_desugar
 Patch0:         0001-Desugar-lambda-function-and-method-reference.patch
 Patch1:         0002-Optionally-Desugar-static-methods-in-interface.patch
 Patch2:         0003-Force-InvokeVirtual-instead-of-InvokeInterface.patch
