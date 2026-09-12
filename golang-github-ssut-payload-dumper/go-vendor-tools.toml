@@ -1,0 +1,8 @@
+[archive]
+
+[licensing]
+detector = "askalono"
+[[licensing.licenses]]
+path = "vendor/github.com/spencercw/go-xz/compression.go"
+sha256sum = "32eb9f98fa07a154bd1e2a59701606f8349a2b66487520bffe0efe0a5dbb88d8"
+expression = "BSD-2-Clause"
